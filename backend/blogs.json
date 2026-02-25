@@ -1,0 +1,162 @@
+[
+  {
+    "Id": 1,
+    "Title": "AI in 2026",
+    "Desc": "Artificial Intelligence is growing rapidly...",
+    "Image": "https://picsum.photos/300/200?1",
+    "Category": "blog",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475052+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 2,
+    "Title": "React UI Design",
+    "Desc": "React helps developers build reusable UI components.",
+    "Image": "https://picsum.photos/300/200?2",
+    "Category": "blog",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475412+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 3,
+    "Title": "JavaScript Tips",
+    "Desc": "JavaScript is the backbone of web development.",
+    "Image": "https://picsum.photos/300/200?3",
+    "Category": "blog",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475454+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 4,
+    "Title": "Web Development",
+    "Desc": "Web development includes frontend and backend...",
+    "Image": "https://picsum.photos/300/200?4",
+    "Category": "blog",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475482+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 5,
+    "Title": "CSS Mastery",
+    "Desc": "CSS controls the look of websites.",
+    "Image": "https://picsum.photos/300/200?5",
+    "Category": "blog",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475507+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 6,
+    "Title": "MongoDB Guide",
+    "Desc": "MongoDB is a NoSQL database.",
+    "Image": "https://picsum.photos/300/200?6",
+    "Category": "feed",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475574+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 7,
+    "Title": "React Libraries",
+    "Desc": "React has a rich ecosystem.",
+    "Image": "https://picsum.photos/300/200?7",
+    "Category": "feed",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475601+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 8,
+    "Title": "UI Inspiration",
+    "Desc": "Good UI improves user experience.",
+    "Image": "https://picsum.photos/300/200?8",
+    "Category": "feed",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475628+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 9,
+    "Title": "Interview Questions",
+    "Desc": "Interviews test fundamentals.",
+    "Image": "https://picsum.photos/300/200?9",
+    "Category": "feed",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475655+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 10,
+    "Title": "Developer Tools",
+    "Desc": "Developer tools improve efficiency.",
+    "Image": "https://picsum.photos/300/200?10",
+    "Category": "feed",
+    "IsUserCreated": false,
+    "CreatedDate": "2026-02-24T23:44:31.0475713+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 11,
+    "Title": "software ",
+    "Desc": "it is my software file.",
+    "Image": "blob:http://localhost:5173/e960f501-69c8-4ee5-a039-145af95d1392",
+    "Category": "blog",
+    "IsUserCreated": true,
+    "CreatedDate": "2026-02-24T23:44:31.0490216+05:30",
+    "IsActive": false
+  },
+  {
+    "Id": 12,
+    "Title": "gfjnmlk,m",
+    "Desc": "hbjlk;l,l",
+    "Image": "blob:http://localhost:5173/6d4d099f-a0bf-4698-9c46-e4eab61195fa",
+    "Category": "blog",
+    "IsUserCreated": true,
+    "CreatedDate": "2026-02-25T00:15:47.1904637+05:30",
+    "IsActive": false
+  },
+  {
+    "Id": 13,
+    "Title": "b n,m,",
+    "Desc": "nm.,.",
+    "Image": "blob:http://localhost:5173/8d9ec9f5-03fa-457e-b2b6-9f9558f9cce1",
+    "Category": "blog",
+    "IsUserCreated": true,
+    "CreatedDate": "2026-02-25T00:21:47.74855+05:30",
+    "IsActive": false
+  },
+  {
+    "Id": 14,
+    "Title": "software",
+    "Desc": " bdkcklmklm",
+    "Image": "blob:http://localhost:5173/a7a42f55-a177-48a6-8f5b-123a1954649c",
+    "Category": "blog",
+    "IsUserCreated": true,
+    "CreatedDate": "2026-02-25T00:30:47.9169984+05:30",
+    "IsActive": false
+  },
+  {
+    "Id": 15,
+    "Title": "jnkml",
+    "Desc": "dsgthn ",
+    "Image": "blob:http://localhost:5173/64077bf5-fb9e-486b-8896-30926df78134",
+    "Category": "blog",
+    "IsUserCreated": true,
+    "CreatedDate": "2026-02-25T10:29:04.1491889+05:30",
+    "IsActive": false
+  },
+  {
+    "Id": 16,
+    "Title": "teju",
+    "Desc": "jioklkl;,lkm",
+    "Image": "blob:http://localhost:5173/ebaba741-ec4d-48d6-a5e1-6a4f27cceed6",
+    "Category": "blog",
+    "IsUserCreated": true,
+    "CreatedDate": "2026-02-25T20:35:47.4707882+05:30",
+    "IsActive": false
+  }
+]
