@@ -1,4 +1,8 @@
 using BlogApi.Services;
+using BlogApi.Helpers; // ✅ for JwtHelper
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,20 +25,51 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ✅ JWT Configuration
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // ✅ Register Services
 builder.Services.AddSingleton<BlogService>();
-builder.Services.AddSingleton<SavedBlogService>(); // ✅ New saved blogs service
-builder.Services.AddSingleton<UserService>(); // ✅ register user service
+builder.Services.AddSingleton<SavedBlogService>();
+builder.Services.AddSingleton<UserService>();
+
+// ✅ Register JwtHelper
+builder.Services.AddScoped<JwtHelper>();
 
 var app = builder.Build();
 
 // ✅ Order matters
 app.UseHttpsRedirection();
 app.UseCors("AllowReact");
+
+// 🔐 IMPORTANT: Authentication before Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axiosInstance from "./api/axiosInstance";
+import PrivateRoute from "./components/PrivateRoute";
 
 import Blog from "./Pages/Blog";
 import CreateBlog from "./Pages/CreateBlog";
@@ -14,25 +15,25 @@ import { deleteBlogApi } from "./api/api";
 function App() {
   const [blogs, setBlogs] = useState([]);
   const [savedBlogIds, setSavedBlogIds] = useState([]);
-  const userId = 1; // ✅ Replace with actual logged-in user ID
 
-  useEffect(() => {
-    fetchBlogs();
-    fetchSavedBlogs();
-  }, []);
+  const token = localStorage.getItem("jwtToken");
+  const username = localStorage.getItem("username");
+  const userId = localStorage.getItem("userId"); // ✅ Correct way
 
-  // ✅ Fetch all active blogs
-  const fetchBlogs = async () => {
+  // ✅ Fetch Blogs
+  const fetchBlogs = useCallback(async () => {
     try {
       const res = await axiosInstance.get("/blogs");
       setBlogs(res.data);
     } catch (err) {
       console.error("Error fetching blogs:", err);
     }
-  };
+  }, []);
 
-  // ✅ Fetch saved blogs for the user
-  const fetchSavedBlogs = async () => {
+  // ✅ Fetch Saved Blogs (Only if logged in)
+  const fetchSavedBlogs = useCallback(async () => {
+    if (!userId) return;
+
     try {
       const res = await axiosInstance.get(`/blogs/saved?userId=${userId}`);
       const ids = res.data.map((b) => b.id);
@@ -40,9 +41,17 @@ function App() {
     } catch (err) {
       console.error("Error fetching saved blogs:", err);
     }
-  };
+  }, [userId]);
 
-  // ✅ Delete blog
+  // ✅ Initial Load
+  useEffect(() => {
+    fetchBlogs();
+    if (token && userId) {
+      fetchSavedBlogs();
+    }
+  }, [fetchBlogs, fetchSavedBlogs, token, userId]);
+
+  // ✅ Delete Blog
   const deleteBlog = async (id) => {
     try {
       await deleteBlogApi(id);
@@ -53,18 +62,24 @@ function App() {
     }
   };
 
-  // ✅ Save a blog
+  // ✅ Save Blog
   const saveBlog = async (blogId) => {
+    if (!userId) return;
+
     try {
       await axiosInstance.post(`/blogs/save/${blogId}?userId=${userId}`);
-      setSavedBlogIds((prev) => [...prev, blogId]);
+      setSavedBlogIds((prev) =>
+        prev.includes(blogId) ? prev : [...prev, blogId]
+      );
     } catch (err) {
       console.error("Error saving blog:", err);
     }
   };
 
-  // ✅ Unsave a blog
+  // ✅ Unsave Blog
   const unsaveBlog = async (blogId) => {
+    if (!userId) return;
+
     try {
       await axiosInstance.delete(`/blogs/save/${blogId}?userId=${userId}`);
       setSavedBlogIds((prev) => prev.filter((id) => id !== blogId));
@@ -75,12 +90,20 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Default Route */}
+      <Route
+        path="/"
+        element={
+          token ? <Navigate to="/landing" replace /> : <Navigate to="/login" replace />
+        }
+      />
 
+      {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
 
+      {/* Public Blog View */}
       <Route
         path="/landing"
         element={
@@ -107,11 +130,15 @@ function App() {
         }
       />
 
-      <Route
-        path="/create-blog"
-        element={<CreateBlog fetchBlogs={fetchBlogs} />}
-      />
+      {/* 🔐 Protected Route */}
+      <Route element={<PrivateRoute />}>
+        <Route
+          path="/create-blog"
+          element={<CreateBlog fetchBlogs={fetchBlogs} />}
+        />
+      </Route>
 
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

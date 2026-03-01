@@ -7,10 +7,10 @@ namespace BlogApi.Services
     {
         private readonly string _filePath;
 
-        public BlogService(IWebHostEnvironment env)
-        {
-            _filePath = Path.Combine(env.ContentRootPath, "blogs.json");
-        }
+        public BlogService()
+{
+    _filePath = @"C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\blogs.json";
+}
 
         private List<Blog> ReadData()
         {

@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { createBlog } from "../api/api";
+import React, { useState, useRef, useEffect } from "react";
+import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 function CreateBlog() {
@@ -7,26 +7,40 @@ function CreateBlog() {
   const [desc, setDesc] = useState("");
   const [file, setFile] = useState(null);
 
+  const [popup, setPopup] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
+
   const fileRef = useRef(null);
   const navigate = useNavigate();
+  const timerRef = useRef(null);
 
-  // Go Back
   const handleGoBack = () => {
     navigate("/blog");
   };
 
-  // Open file picker
   const openFilePicker = () => {
     fileRef.current.click();
   };
 
-  // Clear file
   const clearFile = () => {
     setFile(null);
     fileRef.current.value = "";
   };
 
-  // Submit
+  const closePopup = () => {
+    setPopup({ show: false, message: "", type: "" });
+    if (timerRef.current) clearTimeout(timerRef.current);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -40,11 +54,33 @@ function CreateBlog() {
     };
 
     try {
-      await createBlog(newBlog);
-      navigate("/blog");
+      await axiosInstance.post("/blogs", newBlog);
+
+      setPopup({
+        show: true,
+        message: "Your blog has been created successfully.",
+        type: "success",
+      });
+
+      // ✅ Professional success timing (1 sec)
+      timerRef.current = setTimeout(() => {
+        closePopup();
+        navigate("/blog");
+      }, 1000);
+
     } catch (err) {
-      console.error(err);
-      alert("Error creating blog");
+      console.error("Create error:", err.response?.data || err.message);
+
+      setPopup({
+        show: true,
+        message: "Something went wrong while creating the blog.",
+        type: "error",
+      });
+
+      // ✅ Professional error timing (8 sec)
+      timerRef.current = setTimeout(() => {
+        closePopup();
+      }, 8000);
     }
   };
 
@@ -76,7 +112,6 @@ function CreateBlog() {
           <div
             onClick={openFilePicker}
             style={{
-                     
               display: "flex",
               alignItems: "center",
               gap: "10px",
@@ -99,7 +134,6 @@ function CreateBlog() {
                 opacity: "0.6",
               }}
             />
-
             <span style={{ opacity: file ? 1 : 0.6 }}>
               {file ? file.name : "Attach file"}
             </span>
@@ -114,9 +148,9 @@ function CreateBlog() {
                 padding: "6px 12px",
                 borderRadius: "6px",
                 cursor: "pointer",
-                background: "#1e293b",
-                color: "#f87171",
-                border: "1px solid #374151",
+                background: "#0f172a",
+                color: "#3b82f6",
+                border: "1px solid #1e293b",
               }}
             >
               Remove File
@@ -139,6 +173,73 @@ function CreateBlog() {
           </button>
         </div>
       </form>
+
+      {popup.show && (
+        <div
+          onClick={closePopup}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.35)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 999,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "400px",
+              background: "#111827",
+              borderRadius: "12px",
+              border: "1px solid #1f2937",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                padding: "16px",
+                background: "#1e3a8a",
+                color: "white",
+                fontWeight: "500",
+                textAlign: "center",
+                position: "relative",
+              }}
+            >
+              {popup.type === "success" ? "Success" : "Error"}
+
+              <span
+                onClick={closePopup}
+                style={{
+                  position: "absolute",
+                  right: "15px",
+                  top: "10px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                }}
+              >
+                ✕
+              </span>
+            </div>
+
+            <div
+              style={{
+                padding: "25px",
+                textAlign: "center",
+                color: "#e5e7eb",
+                fontSize: "14px",
+              }}
+            >
+              {popup.message}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

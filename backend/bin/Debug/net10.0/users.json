@@ -30,5 +30,29 @@
     "Password": "12121212",
     "IsGuest": false,
     "CreatedDate": "2026-02-25T10:49:17.5296182+05:30"
+  },
+  {
+    "Id": 5,
+    "Username": "",
+    "Email": "tanujige24@GMAIL.COM",
+    "Password": "abcdef",
+    "IsGuest": false,
+    "CreatedDate": "2026-02-26T15:00:01.8269434+05:30"
+  },
+  {
+    "Id": 6,
+    "Username": "",
+    "Email": "tejashreeshejwal264@gmail.com",
+    "Password": "90909090",
+    "IsGuest": false,
+    "CreatedDate": "2026-02-27T00:30:52.7103536+05:30"
+  },
+  {
+    "Id": 7,
+    "Username": "",
+    "Email": "tejashreeshejwal264@gmail.com",
+    "Password": "567567567",
+    "IsGuest": false,
+    "CreatedDate": "2026-02-27T00:38:17.7267102+05:30"
   }
 ]

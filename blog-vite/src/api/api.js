@@ -1,29 +1,27 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
-const API = axios.create({
-  baseURL: "http://localhost:5111/api",
-});
+// ✅ GET all blogs (Public)
+export const getBlogs = () => axiosInstance.get("/blogs");
 
-// ✅ GET all blogs (optional)
-export const getBlogs = () => API.get("/blogs");
+// ✅ My Blogs (Public in your backend)
+export const getMyBlogs = () => axiosInstance.get("/blogs/myblogs");
 
-// ✅ NEW - My Blogs only
-export const getMyBlogs = () => API.get("/blogs/myblogs");
+// ✅ Feed (⚠️ Your backend route is /feed, not /myfeed)
+export const getMyFeed = () => axiosInstance.get("/blogs/feed");
 
-// ✅ NEW - My Feed only
-export const getMyFeed = () => API.get("/blogs/myfeed");
+// ✅ GET single blog
+export const getBlogById = (id) => axiosInstance.get(`/blogs/${id}`);
 
-// GET single blog
-export const getBlogById = (id) => API.get(`/blogs/${id}`);
+// 🔐 CREATE blog (Protected)
+export const createBlog = (data) => axiosInstance.post("/blogs", data);
 
-// CREATE blog
-export const createBlog = (data) => API.post("/blogs", data);
+// 🔐 DELETE blog (Protected)
+export const deleteBlogApi = (id) => axiosInstance.delete(`/blogs/${id}`);
 
-// DELETE blog
-export const deleteBlogApi = (id) => API.delete(`/blogs/${id}`);
+// 🔐 LOGIN
+export const loginUser = (data) =>
+  axiosInstance.post("/users/login", data);
 
-// ✅ LOGIN
-export const loginUser = (data) => API.post("/users/login", data);
-
-// ✅ SIGNUP
-export const signupUser = (data) => API.post("/users/signup", data);
+// 🔐 SIGNUP
+export const signupUser = (data) =>
+  axiosInstance.post("/users/signup", data);

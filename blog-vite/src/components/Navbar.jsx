@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -56,7 +57,7 @@ function Navbar({ search, setSearch, setShowSaved }) {
           Create Blog
         </button>
 
-        {/* MORE MENU */}
+     {/* MORE MENU */}
         <div className="more-wrapper" ref={menuRef}>
           {/* ✅ Base64 user icon */}
           <img
@@ -81,10 +82,13 @@ function Navbar({ search, setSearch, setShowSaved }) {
               <div
                 className="more-item"
                 onClick={() => {
+                  // ✅ Clear JWT token & navigate to login
+                  localStorage.removeItem("jwtToken");
+                  localStorage.removeItem("userType");
                   setShowSaved(false);
                   setSearch("");
-                  navigate("/");
                   setOpenMenu(false);
+                  navigate("/login");
                 }}
               >
                 Sign Out
@@ -97,4 +101,4 @@ function Navbar({ search, setSearch, setShowSaved }) {
   );
 }
 
-export default Navbar; 
+export default Navbar;

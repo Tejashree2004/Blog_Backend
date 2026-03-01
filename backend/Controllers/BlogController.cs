@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization; // ✅ Add this
 using BlogApi.Models;
 using BlogApi.Services;
 
@@ -17,7 +18,7 @@ namespace BlogApi.Controllers
             _savedService = savedService;
         }
 
-        // 🔥 GET ALL ACTIVE BLOGS
+        // 🔥 GET ALL ACTIVE BLOGS (Public)
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -25,7 +26,7 @@ namespace BlogApi.Controllers
             return Ok(blogs);
         }
 
-        // 🔥 GET ONLY MY BLOGS (category = blog)
+        // 🔥 GET ONLY MY BLOGS (Public)
         [HttpGet("myblogs")]
         public IActionResult GetMyBlogs()
         {
@@ -33,7 +34,7 @@ namespace BlogApi.Controllers
             return Ok(blogs);
         }
 
-        // 🔥 GET ONLY FEED (category = feed)
+        // 🔥 GET ONLY FEED (Public)
         [HttpGet("feed")]
         public IActionResult GetFeed()
         {
@@ -41,7 +42,7 @@ namespace BlogApi.Controllers
             return Ok(blogs);
         }
 
-        // 🔥 GET BLOG BY ID
+        // 🔥 GET BLOG BY ID (Public)
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -50,7 +51,8 @@ namespace BlogApi.Controllers
             return Ok(blog);
         }
 
-        // 🔥 CREATE BLOG
+        // 🔐 CREATE BLOG (Protected)
+        [Authorize]
         [HttpPost]
         public IActionResult Create([FromBody] Blog newBlog)
         {
@@ -58,7 +60,8 @@ namespace BlogApi.Controllers
             return CreatedAtAction(nameof(Get), new { id = blog.Id }, blog);
         }
 
-        // 🔥 DELETE BLOG (Soft Delete) - only user-created
+        // 🔐 DELETE BLOG (Protected)
+        [Authorize]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
@@ -69,18 +72,21 @@ namespace BlogApi.Controllers
             return Ok(new { message = "Blog deleted successfully." });
         }
 
-        // 🔥 SAVE A BLOG FOR USER
+        // 🔐 SAVE A BLOG
+        [Authorize]
         [HttpPost("save/{blogId}")]
         public IActionResult SaveBlog(int blogId, [FromQuery] int userId)
         {
             var blog = _blogService.GetById(blogId);
-            if (blog == null || !blog.IsActive) return NotFound("Blog not found or inactive.");
+            if (blog == null || !blog.IsActive) 
+                return NotFound("Blog not found or inactive.");
 
             _savedService.SaveBlog(userId, blogId);
             return Ok(new { message = "Blog saved successfully." });
         }
 
-        // 🔥 UNSAVE A BLOG FOR USER
+        // 🔐 UNSAVE A BLOG
+        [Authorize]
         [HttpDelete("save/{blogId}")]
         public IActionResult UnsaveBlog(int blogId, [FromQuery] int userId)
         {
@@ -88,7 +94,8 @@ namespace BlogApi.Controllers
             return Ok(new { message = "Blog unsaved successfully." });
         }
 
-        // 🔥 GET ALL SAVED BLOGS FOR USER
+        // 🔐 GET SAVED BLOGS
+        [Authorize]
         [HttpGet("saved")]
         public IActionResult GetSavedBlogs([FromQuery] int userId)
         {

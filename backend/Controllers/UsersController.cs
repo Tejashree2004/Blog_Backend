@@ -1,5 +1,6 @@
 using BlogApi.Models;
 using BlogApi.Services;
+using BlogApi.Helpers; // ✅ Add this
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApi.Controllers
@@ -9,10 +10,12 @@ namespace BlogApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly JwtHelper _jwtHelper; // ✅ Add this
 
-        public UsersController(UserService userService)
+        public UsersController(UserService userService, JwtHelper jwtHelper)
         {
             _userService = userService;
+            _jwtHelper = jwtHelper;
         }
 
         // ✅ Signup
@@ -27,7 +30,7 @@ namespace BlogApi.Controllers
             return Ok(createdUser);
         }
 
-        // ✅ Login
+        // ✅ Login (Now returns JWT)
         [HttpPost("login")]
         public IActionResult Login([FromBody] User user)
         {
@@ -35,7 +38,14 @@ namespace BlogApi.Controllers
             if (authUser == null)
                 return Unauthorized(new { message = "Invalid credentials" });
 
-            return Ok(authUser);
+            // 🔐 Generate JWT Token
+            var token = _jwtHelper.GenerateToken(authUser.Username);
+
+            return Ok(new
+            {
+                token = token,
+                username = authUser.Username
+            });
         }
 
         // ✅ Guest Login
@@ -43,7 +53,15 @@ namespace BlogApi.Controllers
         public IActionResult GuestLogin()
         {
             var guest = _userService.CreateGuest();
-            return Ok(guest);
+
+            // Optional: give guest token also
+            var token = _jwtHelper.GenerateToken(guest.Username);
+
+            return Ok(new
+            {
+                token = token,
+                username = guest.Username
+            });
         }
     }
 }
