@@ -16,7 +16,22 @@ namespace BlogApi.Helpers
 
         public string GenerateToken(string username)
         {
-            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
+            // ❌ REMOVE guest/null logic (VERY IMPORTANT)
+
+            var keyString = _config["Jwt:Key"];
+            var durationStr = _config["Jwt:DurationInMinutes"];
+            var issuer = _config["Jwt:Issuer"];
+            var audience = _config["Jwt:Audience"];
+
+            if (string.IsNullOrWhiteSpace(keyString) ||
+                string.IsNullOrWhiteSpace(durationStr) ||
+                string.IsNullOrWhiteSpace(issuer) ||
+                string.IsNullOrWhiteSpace(audience))
+            {
+                throw new InvalidOperationException("JWT configuration is missing in appsettings.");
+            }
+
+            var key = Encoding.ASCII.GetBytes(keyString);
 
             var claims = new[]
             {
@@ -26,15 +41,9 @@ namespace BlogApi.Helpers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-
-                // ✅ safer way
-                Expires = DateTime.UtcNow.AddMinutes(
-                    double.Parse(_config["Jwt:DurationInMinutes"]!)
-                ),
-
-                Issuer = _config["Jwt:Issuer"],
-                Audience = _config["Jwt:Audience"],
-
+                Expires = DateTime.UtcNow.AddMinutes(double.Parse(durationStr)),
+                Issuer = issuer,
+                Audience = audience,
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature

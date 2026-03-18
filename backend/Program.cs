@@ -1,5 +1,6 @@
 using BlogApi.Services;
-using BlogApi.Helpers; // ✅ for JwtHelper
+using BlogApi.Helpers;
+using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -7,14 +8,14 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Add Controllers + Force camelCase JSON
+// ================= CONTROLLERS ================= //
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
 
-// ✅ Add CORS for React
+// ================= CORS ================= //
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
@@ -25,9 +26,21 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ JWT Configuration
+// ================= JWT CONFIG ================= //
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
+
+var keyString = jwtSettings["Key"];
+var issuer = jwtSettings["Issuer"];
+var audience = jwtSettings["Audience"];
+
+if (string.IsNullOrWhiteSpace(keyString) ||
+    string.IsNullOrWhiteSpace(issuer) ||
+    string.IsNullOrWhiteSpace(audience))
+{
+    throw new InvalidOperationException("JWT configuration missing");
+}
+
+var key = Encoding.ASCII.GetBytes(keyString);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -38,38 +51,49 @@ builder.Services.AddAuthentication(options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key)
+        ValidateLifetime = true,
+
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+
+        ClockSkew = TimeSpan.Zero
     };
 });
 
-// Swagger
+// ================= SWAGGER ================= //
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ✅ Register Services
+// ================= SERVICES ================= //
+
+// 🔥 IMPORTANT: use Scoped (NOT Singleton)
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<EmailService>();
+
+// Other services can remain singleton
 builder.Services.AddSingleton<BlogService>();
 builder.Services.AddSingleton<SavedBlogService>();
-builder.Services.AddSingleton<UserService>();
 
-// ✅ Register JwtHelper
 builder.Services.AddScoped<JwtHelper>();
 
+// ================= BUILD APP ================= //
 var app = builder.Build();
 
-// ✅ Order matters
-app.UseHttpsRedirection();
+// ================= MIDDLEWARE ================= //
+
 app.UseCors("AllowReact");
 
-// 🔐 IMPORTANT: Authentication before Authorization
-app.UseAuthentication();
+app.UseAuthentication();   // MUST be before Authorization
 app.UseAuthorization();
+
+app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment())
 {

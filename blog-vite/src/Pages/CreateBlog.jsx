@@ -1,8 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
-function CreateBlog() {
+function CreateBlog({ fetchBlogs }) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [file, setFile] = useState(null);
@@ -16,19 +16,30 @@ function CreateBlog() {
   const fileRef = useRef(null);
   const navigate = useNavigate();
 
-  const handleGoBack = () => {
-    navigate("/blog");
-  };
+  // 🔐 Only logged-in users
+  useEffect(() => {
+    const token = localStorage.getItem("jwtToken");
 
-  const openFilePicker = () => {
-    fileRef.current.click();
-  };
+    if (!token) {
+      setPopup({
+        show: true,
+        message: "Login required to create a blog.",
+        type: "error"
+      });
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  const handleGoBack = () => navigate("/blog");
+
+  const openFilePicker = () => fileRef.current.click();
 
   const clearFile = () => {
     setFile(null);
-    fileRef.current.value = "";
+    if (fileRef.current) fileRef.current.value = "";
   };
 
+  // ✅ CLOSE POPUP
   const closePopup = () => {
     setPopup({ show: false, message: "", type: "" });
 
@@ -40,17 +51,15 @@ function CreateBlog() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ⭐ Added guest handling
-    const username = localStorage.getItem("username");
-    let authorId = username;
+    const token = localStorage.getItem("jwtToken");
 
-    if (!username) {
-      let guestId = localStorage.getItem("guestId");
-      if (!guestId) {
-        guestId = "guest_" + Date.now();
-        localStorage.setItem("guestId", guestId);
-      }
-      authorId = guestId;
+    if (!token) {
+      setPopup({
+        show: true,
+        message: "Login required!",
+        type: "error"
+      });
+      return;
     }
 
     const newBlog = {
@@ -61,8 +70,7 @@ function CreateBlog() {
         : "https://picsum.photos/300/200?random",
       category: "blog",
       isActive: true,
-      isUserCreated: true, // ⭐ Added flag
-      author: authorId // ⭐ Use username OR guestId
+      isUserCreated: true
     };
 
     try {
@@ -73,12 +81,21 @@ function CreateBlog() {
         message: "Your blog has been created successfully.",
         type: "success"
       });
+
+      setTitle("");
+      setDesc("");
+      clearFile();
+
+      if (fetchBlogs) fetchBlogs();
+
     } catch (err) {
       console.error("Create error:", err.response?.data || err.message);
 
       setPopup({
         show: true,
-        message: "Something went wrong while creating the blog.",
+        message:
+          err.response?.data?.message ||
+          "Something went wrong while creating the blog.",
         type: "error"
       });
     }
@@ -86,6 +103,8 @@ function CreateBlog() {
 
   return (
     <div className="create-page" style={{ position: "relative" }}>
+
+      {/* BACK BUTTON */}
       <button className="go-back-btn" onClick={handleGoBack}>
         ⮌
       </button>
@@ -101,7 +120,7 @@ function CreateBlog() {
           required
         />
 
-        {/* File Upload */}
+        {/* ================= FILE UPLOAD ================= */}
         <div style={{ marginTop: "20px" }}>
           <input
             type="file"
@@ -140,6 +159,7 @@ function CreateBlog() {
             </span>
           </div>
 
+          {/* ✅ REMOVE BUTTON (FIXED POSITION) */}
           {file && (
             <button
               type="button"
@@ -166,7 +186,7 @@ function CreateBlog() {
           onChange={(e) => setDesc(e.target.value)}
           required
           style={{ marginTop: "25px" }}
-        ></textarea>
+        />
 
         <div className="btn-center" style={{ marginTop: "25px" }}>
           <button type="submit" className="create-btn">
@@ -175,7 +195,7 @@ function CreateBlog() {
         </div>
       </form>
 
-      {/* Popup */}
+      {/* ================= POPUP ================= */}
       {popup.show && (
         <div
           onClick={closePopup}
@@ -203,17 +223,19 @@ function CreateBlog() {
               overflow: "hidden"
             }}
           >
+            {/* HEADER */}
             <div
               style={{
                 padding: "16px",
                 background: popup.type === "success" ? "#2563eb" : "#dc2626",
                 color: "white",
-                fontWeight: "500",
                 textAlign: "center",
                 position: "relative"
               }}
             >
               {popup.type === "success" ? "Success" : "Error"}
+
+              {/* ❌ CLOSE ICON */}
               <span
                 onClick={closePopup}
                 style={{
@@ -228,6 +250,7 @@ function CreateBlog() {
               </span>
             </div>
 
+            {/* BODY */}
             <div
               style={{
                 padding: "25px",

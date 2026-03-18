@@ -11,7 +11,6 @@ C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\appsettin
 C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\appsettings.json
 C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\blogs.json
 C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\savedBlogs.json
-C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\users.json
 C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\backend.staticwebassets.endpoints.json
 C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\backend.exe
 C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\backend.deps.json
@@ -46,3 +45,6 @@ C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\obj\Debug\net10.0\refint\ba
 C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\obj\Debug\net10.0\backend.pdb
 C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\obj\Debug\net10.0\backend.genruntimeconfig.cache
 C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\obj\Debug\net10.0\ref\backend.dll
+C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\BouncyCastle.Cryptography.dll
+C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\MailKit.dll
+C:\Users\sonav\OneDrive\Desktop\BLOG_PROJECT\backend\bin\Debug\net10.0\MimeKit.dll

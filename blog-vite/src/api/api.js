@@ -1,27 +1,61 @@
 import axiosInstance from "./axiosInstance";
 
-// ✅ GET all blogs (Public)
-export const getBlogs = () => axiosInstance.get("/blogs");
+// ===================== BLOG ROUTES ===================== //
 
-// ✅ My Blogs (Public in your backend)
-export const getMyBlogs = () => axiosInstance.get("/blogs/myblogs");
+export const getBlogs = async () => {
+  const res = await axiosInstance.get("/blogs");
+  return res.data;
+};
 
-// ✅ Feed (⚠️ Your backend route is /feed, not /myfeed)
-export const getMyFeed = () => axiosInstance.get("/blogs/feed");
+export const getMyBlogs = async () => {
+  const res = await axiosInstance.get("/blogs/myblogs");
+  return res.data;
+};
 
-// ✅ GET single blog
-export const getBlogById = (id) => axiosInstance.get(`/blogs/${id}`);
+export const getMyFeed = async () => {
+  const res = await axiosInstance.get("/blogs/feed");
+  return res.data;
+};
 
-// 🔐 CREATE blog (Protected)
-export const createBlog = (data) => axiosInstance.post("/blogs", data);
+export const getBlogById = async (id) => {
+  const res = await axiosInstance.get(`/blogs/${id}`);
+  return res.data;
+};
 
-// 🔐 DELETE blog (Protected)
-export const deleteBlogApi = (id) => axiosInstance.delete(`/blogs/${id}`);
+export const createBlog = async (data) => {
+  const res = await axiosInstance.post("/blogs", data);
+  return res.data;
+};
 
-// 🔐 LOGIN
-export const loginUser = (data) =>
-  axiosInstance.post("/users/login", data);
+export const deleteBlogApi = async (id) => {
+  const res = await axiosInstance.delete(`/blogs/${id}`);
+  return res.data;
+};
 
-// 🔐 SIGNUP
-export const signupUser = (data) =>
-  axiosInstance.post("/users/signup", data);
+// ===================== AUTH ===================== //
+
+export const loginUser = async (data) => {
+  const res = await axiosInstance.post("/auth/login", data);
+
+  console.log("🔥 LOGIN RESPONSE:", res.data);
+
+  if (res.data?.token) {
+    localStorage.setItem("jwtToken", res.data.token);
+    localStorage.setItem("username", res.data.username);
+  } else {
+    console.error("❌ Token missing in response");
+  }
+
+  return res.data;
+};
+
+export const signupUser = async (data) => {
+  const res = await axiosInstance.post("/auth/signup", data);
+  return res.data;
+};
+
+// 🔥 FIXED
+export const verifyEmailOtp = async (data) => {
+  const res = await axiosInstance.post("/auth/verify-email", data);
+  return res.data; // ✅ important
+};

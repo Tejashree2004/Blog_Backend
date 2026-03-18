@@ -1,7 +1,8 @@
 using BlogApi.Models;
 using BlogApi.Services;
-using BlogApi.Helpers; // ✅ Add this
 using Microsoft.AspNetCore.Mvc;
+using Backend.Services;
+using System.Threading.Tasks;
 
 namespace BlogApi.Controllers
 {
@@ -10,57 +11,94 @@ namespace BlogApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserService _userService;
-        private readonly JwtHelper _jwtHelper; // ✅ Add this
+        private readonly EmailService _emailService;
 
-        public UsersController(UserService userService, JwtHelper jwtHelper)
+        public UsersController(UserService userService, EmailService emailService)
         {
             _userService = userService;
-            _jwtHelper = jwtHelper;
+            _emailService = emailService;
         }
 
-        // ✅ Signup
+        // ✅ Signup → create user, generate OTP, send email
         [HttpPost("signup")]
-        public IActionResult Signup([FromBody] User newUser)
+        public async Task<IActionResult> Signup([FromBody] User newUser)
         {
-            var users = _userService.Authenticate(newUser.Username, newUser.Password);
-            if (users != null)
-                return BadRequest(new { message = "User already exists." });
+            if (newUser == null || string.IsNullOrWhiteSpace(newUser.Email) || string.IsNullOrWhiteSpace(newUser.Password))
+                return BadRequest(new { message = "Email and Password are required." });
 
-            var createdUser = _userService.Create(newUser);
-            return Ok(createdUser);
+            if (string.IsNullOrWhiteSpace(newUser.Username))
+                newUser.Username = newUser.Email.Split('@')[0];
+
+            try
+            {
+                var createdUser = _userService.Create(newUser, out string? error);
+                if (createdUser == null)
+                    return BadRequest(new { message = error });
+
+                var otp = _userService.GenerateOtp(createdUser.Email);
+
+                // ✅ Send email safely (fail silently if SMTP fails)
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(createdUser.Email) && _emailService != null)
+                    {
+                        await _emailService.SendEmailAsync(
+                            createdUser.Email,
+                            "Verify your email",
+                            $"Your OTP is {otp}"
+                        );
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine($"[WARN] Failed to send email OTP to {createdUser.Email}. OTP: {otp}");
+                }
+
+                return Ok(new
+                {
+                    message = "User created successfully. OTP sent to your email (or terminal).",
+                    email = createdUser.Email
+                });
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, new { message = "Signup failed: " + ex.Message });
+            }
         }
 
-        // ✅ Login (Now returns JWT)
+        // ✅ Verify Email OTP
+        [HttpPost("verify-email")]
+        public IActionResult VerifyEmail([FromBody] VerifyRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Otp))
+                return BadRequest(new { message = "Email and OTP are required." });
+
+            bool verified = _userService.VerifyOtp(request.Email, request.Otp);
+            if (!verified)
+                return BadRequest(new { message = "Invalid OTP." });
+
+            return Ok(new { message = "Email verified successfully." });
+        }
+
+        // ✅ Login (flexible: email or username)
         [HttpPost("login")]
         public IActionResult Login([FromBody] User user)
         {
-            var authUser = _userService.Authenticate(user.Username, user.Password);
+            if (user == null || (string.IsNullOrWhiteSpace(user.Email) && string.IsNullOrWhiteSpace(user.Username)) || string.IsNullOrWhiteSpace(user.Password))
+                return BadRequest(new { message = "Email/Username and Password are required." });
+
+            // Use email if provided, else username
+            string loginField = !string.IsNullOrWhiteSpace(user.Email) ? user.Email : user.Username;
+
+            var authUser = _userService.Authenticate(loginField, user.Password);
+
             if (authUser == null)
-                return Unauthorized(new { message = "Invalid credentials" });
-
-            // 🔐 Generate JWT Token
-            var token = _jwtHelper.GenerateToken(authUser.Username);
+                return Unauthorized(new { message = "Invalid credentials or email not verified." });
 
             return Ok(new
             {
-                token = token,
-                username = authUser.Username
-            });
-        }
-
-        // ✅ Guest Login
-        [HttpPost("guest")]
-        public IActionResult GuestLogin()
-        {
-            var guest = _userService.CreateGuest();
-
-            // Optional: give guest token also
-            var token = _jwtHelper.GenerateToken(guest.Username);
-
-            return Ok(new
-            {
-                token = token,
-                username = guest.Username
+                username = authUser.Username,
+                email = authUser.Email
             });
         }
     }

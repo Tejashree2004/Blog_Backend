@@ -5,9 +5,11 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Login() {
   const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // ✅ added
+  const [showPassword, setShowPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -16,7 +18,7 @@ function Login() {
     setPassword("");
   }, []);
 
-  // ✅ Real Login (JWT Version)
+  // ✅ LOGIN FUNCTION (FIXED)
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -28,28 +30,68 @@ function Login() {
     try {
       setLoading(true);
 
-      const res = await loginUser({ username, password });
+      const res = await loginUser({
+        email: username,
+        username,
+        password,
+      });
 
-      const { token, username: returnedUsername } = res.data;
+      console.log("🔥 LOGIN RESPONSE:", res);
 
+      // ✅ IMPORTANT FIX
+      if (!res || !res.token) {
+        setError("Login failed: Token not received");
+        return;
+      }
+
+      const { username: returnedUsername, email, token } = res;
+
+      // ✅ SAVE TOKEN
       localStorage.setItem("jwtToken", token);
+
+      // ✅ SAVE USER DATA
       localStorage.setItem("username", returnedUsername);
+      localStorage.setItem("email", email);
+
+      // remove guest flag
       localStorage.removeItem("userType");
+
+      console.log("✅ Token saved:", token);
 
       navigate("/blog");
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || "Login failed");
+      console.error("❌ Login error:", err.response?.data || err.message);
+
+      if (
+        err.response?.data?.message ===
+        "Invalid credentials or email not verified."
+      ) {
+        const proceed = window.confirm(
+          "You haven't verified your email yet. Do you want to continue as Guest?"
+        );
+
+        if (proceed) {
+          localStorage.setItem("userType", "guest");
+          localStorage.removeItem("username");
+          localStorage.removeItem("email");
+          localStorage.removeItem("jwtToken");
+
+          navigate("/blog");
+        }
+      } else {
+        setError(err.response?.data?.message || "Login failed");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Guest Login
+  // ✅ GUEST LOGIN
   const handleGuest = () => {
     localStorage.setItem("userType", "guest");
-    localStorage.removeItem("jwtToken");
     localStorage.removeItem("username");
+    localStorage.removeItem("email");
+    localStorage.removeItem("jwtToken");
 
     navigate("/blog");
   };
@@ -75,13 +117,12 @@ function Login() {
 
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Username or Email"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           disabled={loading}
         />
 
-        {/* ✅ Password With Eye Icon */}
         <div style={{ position: "relative" }}>
           <input
             type={showPassword ? "text" : "password"}

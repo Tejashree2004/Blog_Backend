@@ -1,27 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function CardList({
   items = [],
   search = "",
   showSaved = false,
   deleteBlog,
-  initialSavedIds = [],
   savedBlogIds = [],
   saveBlog,
   unsaveBlog,
 }) {
   const [selectedCard, setSelectedCard] = useState(null);
-
-  const currentUser = localStorage.getItem("username");
-
-  // use savedBlogIds from props
-  const [savedIds, setSavedIds] = useState(
-    savedBlogIds.length ? savedBlogIds : initialSavedIds
-  );
-
+  const [savedIds, setSavedIds] = useState(savedBlogIds || []);
   const [copyMessage, setCopyMessage] = useState("");
 
-  const query = search.toLowerCase();
+  // Current user or guest
+  const currentUser =
+    localStorage.getItem("username") || localStorage.getItem("guestId");
+
+  // Sync savedIds with props changes
+  useEffect(() => {
+    setSavedIds(savedBlogIds);
+  }, [savedBlogIds]);
 
   // Copy to clipboard
   const copyData = (item, e) => {
@@ -33,9 +32,10 @@ function CardList({
     setTimeout(() => setCopyMessage(""), 2000);
   };
 
-  // Save/Unsave
+  // Save/Unsave toggle
   const toggleSave = (item, e) => {
     e.stopPropagation();
+    if (!currentUser) return alert("You must login or continue as guest!");
 
     if (savedIds.includes(item.id)) {
       setSavedIds((prev) => prev.filter((id) => id !== item.id));
@@ -46,12 +46,11 @@ function CardList({
     }
   };
 
-  // Filter logic
+  // Filter based on search & saved
   const filteredItems = items.filter((item) => {
     if (showSaved && !savedIds.includes(item.id)) return false;
-
-    if (query && !item.title.toLowerCase().includes(query)) return false;
-
+    if (search && !item.title.toLowerCase().includes(search.toLowerCase()))
+      return false;
     return true;
   });
 
@@ -66,7 +65,7 @@ function CardList({
           onClick={() => setSelectedCard(item)}
           style={{ position: "relative" }}
         >
-          {/* Save icon */}
+          {/* Save/Unsave Icon */}
           <svg
             onClick={(e) => toggleSave(item, e)}
             xmlns="http://www.w3.org/2000/svg"
@@ -88,7 +87,6 @@ function CardList({
           </svg>
 
           <img src={item.image} alt={item.title} />
-
           <div className="card-content">
             <div className="text-copy-wrapper">
               <div className="text-wrapper">
@@ -106,8 +104,10 @@ function CardList({
       );
     });
 
-  // Full page view
+  // Full-page card view
   if (selectedCard) {
+    const canDelete = selectedCard?.author === currentUser;
+
     return (
       <>
         <div className="fullpage-card">
@@ -133,20 +133,17 @@ function CardList({
                   padding: "6px 12px",
                   borderRadius: "8px",
                   border: "1px solid #374151",
-                  background: "#1f2933",
-                  color: "#f87171",
-                  cursor:
-                    selectedCard?.author === currentUser
-                      ? "pointer"
-                      : "not-allowed",
+                  background: canDelete ? "#1f2933" : "#374151",
+                  color: canDelete ? "#f87171" : "#9ca3af",
+                  cursor: canDelete ? "pointer" : "not-allowed",
                 }}
                 onClick={() => {
-                  if (selectedCard?.author === currentUser && deleteBlog) {
+                  if (canDelete && deleteBlog) {
                     deleteBlog(selectedCard.id);
                     setSelectedCard(null);
                   }
                 }}
-                disabled={selectedCard?.author !== currentUser}
+                disabled={!canDelete}
               >
                 Delete
               </button>
@@ -158,13 +155,12 @@ function CardList({
           </div>
         </div>
 
-        {/* Copy toast */}
         {copyMessage && <div className="copy-toast">{copyMessage}</div>}
       </>
     );
   }
 
-  // Default card view
+  // Default card list view
   return (
     <>
       <div className="card-container">
@@ -180,13 +176,7 @@ function CardList({
               minHeight: "200px",
             }}
           >
-            <p
-              style={{
-                color: "#9ca3af",
-                fontSize: "16px",
-                letterSpacing: "0.5px",
-              }}
-            >
+            <p style={{ color: "#9ca3af", fontSize: "16px", letterSpacing: "0.5px" }}>
               No blogs found.
             </p>
           </div>

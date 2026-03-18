@@ -5,11 +5,14 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Signup() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // ✅ added
-  const [showPassword, setShowPassword] = useState(false); // ✅ added
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // ✅ added
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -17,24 +20,53 @@ function Signup() {
     e.preventDefault();
     setError("");
 
-    if (!email || !password || !confirmPassword) {
-      setError("Please fill all fields");
+    const trimmedEmail = email.trim().toLowerCase(); // 🔥 FIX
+    const trimmedPassword = password.trim();
+    const trimmedConfirm = confirmPassword.trim();
+
+    if (!trimmedEmail || !trimmedPassword || !trimmedConfirm) {
+      setError("Please fill all fields.");
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    if (trimmedPassword !== trimmedConfirm) {
+      setError("Passwords do not match.");
       return;
     }
 
     try {
       setLoading(true);
-      const res = await signupUser({ email, password });
-      localStorage.setItem("signupEmail", email);
-      navigate("/verify-email");
+
+      console.log("Signup Data:", trimmedEmail, trimmedPassword);
+
+      const response = await signupUser({
+        email: trimmedEmail,
+        password: trimmedPassword,
+        username: trimmedEmail.split("@")[0],
+      });
+
+      console.log("Signup response:", response);
+
+      // ✅ SUCCESS CASE
+      if (response?.email) {
+        navigate("/verify-email", { state: { email: response.email } });
+      } else {
+        setError("Signup failed: Invalid server response.");
+      }
+
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || "Signup failed");
+      console.error("🔥 Signup error:", err);
+
+      // 🔥 FIX: use new axios error format
+      const msg = err.message || "Signup failed";
+
+      // ✅ handle already exists
+      if (msg.toLowerCase().includes("already exists")) {
+        navigate("/verify-email", { state: { email: trimmedEmail } });
+      } else {
+        setError(msg);
+      }
+
     } finally {
       setLoading(false);
     }
@@ -43,18 +75,10 @@ function Signup() {
   return (
     <div className="login-container">
       <form onSubmit={handleSignup} autoComplete="off">
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-          Signup
-        </h2>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Signup</h2>
 
         {error && (
-          <p
-            style={{
-              color: "#f87171",
-              textAlign: "center",
-              marginBottom: "10px",
-            }}
-          >
+          <p style={{ color: "#f87171", textAlign: "center", marginBottom: "10px" }}>
             {error}
           </p>
         )}
@@ -68,8 +92,7 @@ function Signup() {
           required
         />
 
-        {/* ✅ Password Field */}
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", marginTop: "10px" }}>
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
@@ -87,14 +110,12 @@ function Signup() {
               top: "50%",
               transform: "translateY(-50%)",
               cursor: "pointer",
-              color: "#6b7280",
             }}
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
         </div>
 
-        {/* ✅ Confirm Password Field */}
         <div style={{ position: "relative", marginTop: "10px" }}>
           <input
             type={showConfirmPassword ? "text" : "password"}
@@ -113,7 +134,6 @@ function Signup() {
               top: "50%",
               transform: "translateY(-50%)",
               cursor: "pointer",
-              color: "#6b7280",
             }}
           >
             {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
@@ -124,13 +144,7 @@ function Signup() {
           {loading ? "Signing up..." : "Signup"}
         </button>
 
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: "14px",
-            marginTop: "12px",
-          }}
-        >
+        <p style={{ textAlign: "center", fontSize: "14px", marginTop: "12px" }}>
           Already have an account?{" "}
           <span
             onClick={() => navigate("/login")}

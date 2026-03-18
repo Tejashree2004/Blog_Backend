@@ -3,19 +3,20 @@ import { Navigate, Outlet } from "react-router-dom";
 
 function PrivateRoute() {
   const token = localStorage.getItem("jwtToken");
-  const userType = localStorage.getItem("userType");
+  const username = localStorage.getItem("username");
+  let userType = localStorage.getItem("userType");
 
-  // If JWT token exists → allow
-  if (token) {
-    return <Outlet />;
+  // Assign guest automatically if nothing exists
+  if (!token && !username && !userType) {
+    const guestId = "guest_" + Date.now();
+    localStorage.setItem("userId", guestId);
+    localStorage.setItem("userType", "guest");
+    userType = "guest";
   }
 
-  // If guest → allow only viewing pages (not create)
-  if (userType === "guest") {
-    return <Outlet />;
-  }
+  // Logged-in user or guest allowed
+  if (username || userType === "guest") return <Outlet />;
 
-  // Otherwise redirect to login
   return <Navigate to="/login" replace />;
 }
 
