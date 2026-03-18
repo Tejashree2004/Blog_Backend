@@ -1,8 +1,24 @@
 import React, { useState } from "react";
 
-function CardList({ items = [], search = "", showSaved = false, deleteBlog, initialSavedIds = [], savedBlogIds = [], saveBlog, unsaveBlog }) {
+function CardList({
+  items = [],
+  search = "",
+  showSaved = false,
+  deleteBlog,
+  initialSavedIds = [],
+  savedBlogIds = [],
+  saveBlog,
+  unsaveBlog,
+}) {
   const [selectedCard, setSelectedCard] = useState(null);
-  const [savedIds, setSavedIds] = useState(initialSavedIds.length > 0 ? initialSavedIds : savedBlogIds); // support initial saved
+
+  const currentUser = localStorage.getItem("username");
+
+  // use savedBlogIds from props
+  const [savedIds, setSavedIds] = useState(
+    savedBlogIds.length ? savedBlogIds : initialSavedIds
+  );
+
   const [copyMessage, setCopyMessage] = useState("");
 
   const query = search.toLowerCase();
@@ -10,7 +26,9 @@ function CardList({ items = [], search = "", showSaved = false, deleteBlog, init
   // Copy to clipboard
   const copyData = (item, e) => {
     if (e) e.stopPropagation();
-    navigator.clipboard.writeText(`Title: ${item.title}\nDescription: ${item.desc}`);
+    navigator.clipboard.writeText(
+      `Title: ${item.title}\nDescription: ${item.desc}`
+    );
     setCopyMessage("Copied successfully ✓");
     setTimeout(() => setCopyMessage(""), 2000);
   };
@@ -18,6 +36,7 @@ function CardList({ items = [], search = "", showSaved = false, deleteBlog, init
   // Save/Unsave
   const toggleSave = (item, e) => {
     e.stopPropagation();
+
     if (savedIds.includes(item.id)) {
       setSavedIds((prev) => prev.filter((id) => id !== item.id));
       unsaveBlog && unsaveBlog(item.id);
@@ -27,16 +46,19 @@ function CardList({ items = [], search = "", showSaved = false, deleteBlog, init
     }
   };
 
-  // Filter based on search & saved
+  // Filter logic
   const filteredItems = items.filter((item) => {
     if (showSaved && !savedIds.includes(item.id)) return false;
+
     if (query && !item.title.toLowerCase().includes(query)) return false;
+
     return true;
   });
 
   const renderCards = (data) =>
     data.map((item) => {
       const isSaved = savedIds.includes(item.id);
+
       return (
         <div
           key={item.id}
@@ -73,6 +95,7 @@ function CardList({ items = [], search = "", showSaved = false, deleteBlog, init
                 <h3>{item.title}</h3>
                 <p>{item.desc}</p>
               </div>
+
               {/* Copy icon */}
               <span className="copy-icon" onClick={(e) => copyData(item, e)}>
                 🗍
@@ -83,7 +106,7 @@ function CardList({ items = [], search = "", showSaved = false, deleteBlog, init
       );
     });
 
-  // Full-page view
+  // Full page view
   if (selectedCard) {
     return (
       <>
@@ -97,7 +120,13 @@ function CardList({ items = [], search = "", showSaved = false, deleteBlog, init
             <img src={selectedCard.image} alt={selectedCard.title} />
             <p>{selectedCard.desc}</p>
 
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "20px",
+              }}
+            >
               {/* Delete button */}
               <button
                 style={{
@@ -106,15 +135,18 @@ function CardList({ items = [], search = "", showSaved = false, deleteBlog, init
                   border: "1px solid #374151",
                   background: "#1f2933",
                   color: "#f87171",
-                  cursor: selectedCard?.isUserCreated ? "pointer" : "not-allowed",
+                  cursor:
+                    selectedCard?.author === currentUser
+                      ? "pointer"
+                      : "not-allowed",
                 }}
                 onClick={() => {
-                  if (selectedCard?.isUserCreated && deleteBlog) {
+                  if (selectedCard?.author === currentUser && deleteBlog) {
                     deleteBlog(selectedCard.id);
                     setSelectedCard(null);
                   }
                 }}
-                disabled={!selectedCard?.isUserCreated}
+                disabled={selectedCard?.author !== currentUser}
               >
                 Delete
               </button>
@@ -132,15 +164,29 @@ function CardList({ items = [], search = "", showSaved = false, deleteBlog, init
     );
   }
 
-  // Default view
+  // Default card view
   return (
     <>
       <div className="card-container">
         {filteredItems.length > 0 ? (
           renderCards(filteredItems)
         ) : (
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", minHeight: "200px" }}>
-            <p style={{ color: "#9ca3af", fontSize: "16px", letterSpacing: "0.5px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              minHeight: "200px",
+            }}
+          >
+            <p
+              style={{
+                color: "#9ca3af",
+                fontSize: "16px",
+                letterSpacing: "0.5px",
+              }}
+            >
               No blogs found.
             </p>
           </div>

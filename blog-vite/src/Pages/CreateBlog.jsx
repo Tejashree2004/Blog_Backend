@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
@@ -10,12 +10,11 @@ function CreateBlog() {
   const [popup, setPopup] = useState({
     show: false,
     message: "",
-    type: "",
+    type: ""
   });
 
   const fileRef = useRef(null);
   const navigate = useNavigate();
-  const timerRef = useRef(null);
 
   const handleGoBack = () => {
     navigate("/blog");
@@ -32,17 +31,27 @@ function CreateBlog() {
 
   const closePopup = () => {
     setPopup({ show: false, message: "", type: "" });
-    if (timerRef.current) clearTimeout(timerRef.current);
-  };
 
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
+    if (popup.type === "success") {
+      navigate("/blog");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ⭐ Added guest handling
+    const username = localStorage.getItem("username");
+    let authorId = username;
+
+    if (!username) {
+      let guestId = localStorage.getItem("guestId");
+      if (!guestId) {
+        guestId = "guest_" + Date.now();
+        localStorage.setItem("guestId", guestId);
+      }
+      authorId = guestId;
+    }
 
     const newBlog = {
       title,
@@ -51,6 +60,9 @@ function CreateBlog() {
         ? URL.createObjectURL(file)
         : "https://picsum.photos/300/200?random",
       category: "blog",
+      isActive: true,
+      isUserCreated: true, // ⭐ Added flag
+      author: authorId // ⭐ Use username OR guestId
     };
 
     try {
@@ -59,28 +71,16 @@ function CreateBlog() {
       setPopup({
         show: true,
         message: "Your blog has been created successfully.",
-        type: "success",
+        type: "success"
       });
-
-      // ✅ Professional success timing (1 sec)
-      timerRef.current = setTimeout(() => {
-        closePopup();
-        navigate("/blog");
-      }, 1000);
-
     } catch (err) {
       console.error("Create error:", err.response?.data || err.message);
 
       setPopup({
         show: true,
         message: "Something went wrong while creating the blog.",
-        type: "error",
+        type: "error"
       });
-
-      // ✅ Professional error timing (8 sec)
-      timerRef.current = setTimeout(() => {
-        closePopup();
-      }, 8000);
     }
   };
 
@@ -101,6 +101,7 @@ function CreateBlog() {
           required
         />
 
+        {/* File Upload */}
         <div style={{ marginTop: "20px" }}>
           <input
             type="file"
@@ -121,7 +122,7 @@ function CreateBlog() {
               border: "1px dashed #3b82f6",
               cursor: "pointer",
               background: "transparent",
-              color: "white",
+              color: "white"
             }}
           >
             <img
@@ -131,7 +132,7 @@ function CreateBlog() {
                 width: "18px",
                 height: "18px",
                 filter: "invert(1)",
-                opacity: "0.6",
+                opacity: "0.6"
               }}
             />
             <span style={{ opacity: file ? 1 : 0.6 }}>
@@ -150,7 +151,7 @@ function CreateBlog() {
                 cursor: "pointer",
                 background: "#0f172a",
                 color: "#3b82f6",
-                border: "1px solid #1e293b",
+                border: "1px solid #1e293b"
               }}
             >
               Remove File
@@ -174,6 +175,7 @@ function CreateBlog() {
         </div>
       </form>
 
+      {/* Popup */}
       {popup.show && (
         <div
           onClick={closePopup}
@@ -187,7 +189,7 @@ function CreateBlog() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            zIndex: 999,
+            zIndex: 999
           }}
         >
           <div
@@ -198,21 +200,20 @@ function CreateBlog() {
               borderRadius: "12px",
               border: "1px solid #1f2937",
               boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-              overflow: "hidden",
+              overflow: "hidden"
             }}
           >
             <div
               style={{
                 padding: "16px",
-                background: "#1e3a8a",
+                background: popup.type === "success" ? "#2563eb" : "#dc2626",
                 color: "white",
                 fontWeight: "500",
                 textAlign: "center",
-                position: "relative",
+                position: "relative"
               }}
             >
               {popup.type === "success" ? "Success" : "Error"}
-
               <span
                 onClick={closePopup}
                 style={{
@@ -220,7 +221,7 @@ function CreateBlog() {
                   right: "15px",
                   top: "10px",
                   cursor: "pointer",
-                  fontSize: "16px",
+                  fontSize: "16px"
                 }}
               >
                 ✕
@@ -232,7 +233,7 @@ function CreateBlog() {
                 padding: "25px",
                 textAlign: "center",
                 color: "#e5e7eb",
-                fontSize: "14px",
+                fontSize: "14px"
               }}
             >
               {popup.message}

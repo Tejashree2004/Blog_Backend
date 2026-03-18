@@ -3,80 +3,32 @@
     "Id": 1,
     "Username": "",
     "Email": "tejashreeshejwal264@gmail.com",
-    "Password": "123465432",
+    "Password": "12345678",
     "IsGuest": false,
-    "CreatedDate": "2026-02-25T10:27:42.2594973+05:30"
+    "CreatedDate": "2026-03-18T09:23:28.4603372+05:30"
   },
   {
     "Id": 2,
     "Username": "",
-    "Email": "tejashreeshejwal.rmdstic.it@gmail.com",
+    "Email": "nileshnandk18@gmail.com",
     "Password": "12345678",
     "IsGuest": false,
-    "CreatedDate": "2026-02-25T10:33:29.6379224+05:30"
+    "CreatedDate": "2026-03-18T09:27:31.9739775+05:30"
   },
   {
     "Id": 3,
     "Username": "",
-    "Email": "tejashreeshejwal264@gmail.com",
-    "Password": "87654321",
+    "Email": "tanu@gmail.com",
+    "Password": "12345678",
     "IsGuest": false,
-    "CreatedDate": "2026-02-25T10:34:00.3954885+05:30"
+    "CreatedDate": "2026-03-18T09:33:21.564826+05:30"
   },
   {
     "Id": 4,
     "Username": "",
-    "Email": "tejashreeshejwal.rmdstic.it@gmail.com",
-    "Password": "12121212",
+    "Email": "priya@gmail.com",
+    "Password": "4567845678",
     "IsGuest": false,
-    "CreatedDate": "2026-02-25T10:49:17.5296182+05:30"
-  },
-  {
-    "Id": 5,
-    "Username": "",
-    "Email": "tanujige24@GMAIL.COM",
-    "Password": "abcdef",
-    "IsGuest": false,
-    "CreatedDate": "2026-02-26T15:00:01.8269434+05:30"
-  },
-  {
-    "Id": 6,
-    "Username": "",
-    "Email": "tejashreeshejwal264@gmail.com",
-    "Password": "90909090",
-    "IsGuest": false,
-    "CreatedDate": "2026-02-27T00:30:52.7103536+05:30"
-  },
-  {
-    "Id": 7,
-    "Username": "",
-    "Email": "tejashreeshejwal264@gmail.com",
-    "Password": "567567567",
-    "IsGuest": false,
-    "CreatedDate": "2026-02-27T00:38:17.7267102+05:30"
-  },
-  {
-    "Id": 8,
-    "Username": "",
-    "Email": "teju@gmail.com",
-    "Password": "25252525",
-    "IsGuest": false,
-    "CreatedDate": "2026-02-27T00:52:29.9927401+05:30"
-  },
-  {
-    "Id": 9,
-    "Username": "",
-    "Email": "tejashreeshejwal264@gmail.com",
-    "Password": "12312312",
-    "IsGuest": false,
-    "CreatedDate": "2026-03-01T14:21:43.152882+05:30"
-  },
-  {
-    "Id": 10,
-    "Username": "",
-    "Email": "anuja@gmail.com",
-    "Password": "12341234",
-    "IsGuest": false,
-    "CreatedDate": "2026-03-01T15:08:32.5724194+05:30"
+    "CreatedDate": "2026-03-18T09:34:12.8486167+05:30"
   }
 ]
