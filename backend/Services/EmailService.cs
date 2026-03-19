@@ -23,11 +23,14 @@ namespace Backend.Services
             {
                 var emailSettings = _config.GetSection("SMTP");
 
-                string senderEmail = emailSettings["Email"]
+                // 👉 Email config (can stay in appsettings.json)
+                string senderEmail = Environment.GetEnvironmentVariable("SMTP_EMAIL")
+                    ?? emailSettings["Email"]
                     ?? throw new Exception("SMTP Email not configured");
 
-                string senderPassword = emailSettings["Password"]
-                    ?? throw new Exception("SMTP Password not configured");
+                // 🔥 Password ONLY from .env (secure)
+                string senderPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD")
+                    ?? throw new Exception("SMTP Password not configured in .env");
 
                 string smtpHost = emailSettings["Host"] ?? "smtp.gmail.com";
 
@@ -53,7 +56,7 @@ namespace Backend.Services
 
                 await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
 
-                // 🔥 IMPORTANT for Gmail
+                // 🔐 Secure authentication
                 await client.AuthenticateAsync(senderEmail, senderPassword);
 
                 await client.SendAsync(emailMessage);
@@ -65,7 +68,7 @@ namespace Backend.Services
             catch (Exception ex)
             {
                 Console.WriteLine("❌ Email send failed: " + ex.Message);
-                throw; // 🔥 so you can see real error in console
+                throw;
             }
         }
     }

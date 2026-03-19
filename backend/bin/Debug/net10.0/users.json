@@ -1,0 +1,22 @@
+[
+  {
+    "Id": 1,
+    "Username": "tejashreeshejwal264",
+    "Email": "tejashreeshejwal264@gmail.com",
+    "Password": "12345678",
+    "IsGuest": false,
+    "CreatedDate": "2026-03-19T00:53:51.3005096+05:30",
+    "IsVerified": true,
+    "Otp": null
+  },
+  {
+    "Id": 2,
+    "Username": "tejashreeshejwal.rmdstic.it",
+    "Email": "tejashreeshejwal.rmdstic.it@gmail.com",
+    "Password": "23452345",
+    "IsGuest": false,
+    "CreatedDate": "2026-03-19T00:57:45.5219423+05:30",
+    "IsVerified": true,
+    "Otp": null
+  }
+]

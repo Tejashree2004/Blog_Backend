@@ -6,6 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
 
+// 🔥 Load .env variables
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ================= CONTROLLERS ================= //
@@ -70,6 +73,19 @@ builder.Services.AddAuthentication(options =>
 // ================= SWAGGER ================= //
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// ================= SMTP CONFIG (.env) ================= //
+
+// 👉 Get values from .env
+var smtpEmail = Environment.GetEnvironmentVariable("SMTP_EMAIL");
+var smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
+
+// 👉 Validate (to avoid runtime error)
+if (string.IsNullOrWhiteSpace(smtpEmail) ||
+    string.IsNullOrWhiteSpace(smtpPassword))
+{
+    throw new InvalidOperationException("SMTP credentials missing in .env file");
+}
 
 // ================= SERVICES ================= //
 
