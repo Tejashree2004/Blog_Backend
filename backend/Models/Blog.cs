@@ -14,7 +14,8 @@ namespace BlogApi.Models
 
         public bool IsUserCreated { get; set; } = false;
 
-        // ⭐ ADD THIS (MOST IMPORTANT)
+        // ⭐ IMPORTANT: This stores who created the blog (email or userId)
+        // 👉 Use this to allow delete only for the owner
         public string Author { get; set; } = string.Empty;
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;

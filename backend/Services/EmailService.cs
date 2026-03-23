@@ -46,9 +46,29 @@ namespace Backend.Services
                 emailMessage.To.Add(MailboxAddress.Parse(toEmail));
                 emailMessage.Subject = string.IsNullOrWhiteSpace(subject) ? "OTP Verification" : subject;
 
+                // 🔥 PROFESSIONAL EMAIL BODY (ONLY CHANGE)
+                var currentTime = DateTime.Now.ToString("f");
+
+                string emailBody = $@"
+Hello,
+
+We received a request to verify your email address for your Blog App account.
+
+ {message}
+
+This OTP is valid for 10 minutes.
+
+Request Time: {currentTime}
+
+If you did not request this, please ignore this email and ensure your account is secure.
+
+Regards,  
+Blog App Team
+";
+
                 emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Plain)
                 {
-                    Text = message ?? "Your OTP code"
+                    Text = emailBody
                 };
 
                 // ✅ Send email

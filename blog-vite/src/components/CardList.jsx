@@ -12,30 +12,38 @@ function CardList({
   const [selectedCard, setSelectedCard] = useState(null);
   const [savedIds, setSavedIds] = useState(savedBlogIds || []);
   const [copyMessage, setCopyMessage] = useState("");
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
 
-  // Current user or guest
+  // 🔐 Current user
   const currentUser =
-    localStorage.getItem("username") || localStorage.getItem("guestId");
+    localStorage.getItem("username") ||
+    localStorage.getItem("guestId");
 
-  // Sync savedIds with props changes
+  // 🔄 Sync saved blogs
   useEffect(() => {
     setSavedIds(savedBlogIds);
   }, [savedBlogIds]);
 
-  // Copy to clipboard
+  // 📋 Copy
   const copyData = (item, e) => {
     if (e) e.stopPropagation();
+
     navigator.clipboard.writeText(
       `Title: ${item.title}\nDescription: ${item.desc}`
     );
+
     setCopyMessage("Copied successfully ✓");
     setTimeout(() => setCopyMessage(""), 2000);
   };
 
-  // Save/Unsave toggle
+  // ❤️ Save toggle
   const toggleSave = (item, e) => {
     e.stopPropagation();
-    if (!currentUser) return alert("You must login or continue as guest!");
+
+    if (!currentUser) {
+      alert("You must login or continue as guest!");
+      return;
+    }
 
     if (savedIds.includes(item.id)) {
       setSavedIds((prev) => prev.filter((id) => id !== item.id));
@@ -46,14 +54,20 @@ function CardList({
     }
   };
 
-  // Filter based on search & saved
+  // 🔍 Filter
   const filteredItems = items.filter((item) => {
     if (showSaved && !savedIds.includes(item.id)) return false;
-    if (search && !item.title.toLowerCase().includes(search.toLowerCase()))
+
+    if (
+      search &&
+      !item.title.toLowerCase().includes(search.toLowerCase())
+    )
       return false;
+
     return true;
   });
 
+  // 🎴 Cards
   const renderCards = (data) =>
     data.map((item) => {
       const isSaved = savedIds.includes(item.id);
@@ -65,7 +79,7 @@ function CardList({
           onClick={() => setSelectedCard(item)}
           style={{ position: "relative" }}
         >
-          {/* Save/Unsave Icon */}
+          {/* ❤️ Save */}
           <svg
             onClick={(e) => toggleSave(item, e)}
             xmlns="http://www.w3.org/2000/svg"
@@ -87,6 +101,7 @@ function CardList({
           </svg>
 
           <img src={item.image} alt={item.title} />
+
           <div className="card-content">
             <div className="text-copy-wrapper">
               <div className="text-wrapper">
@@ -94,8 +109,10 @@ function CardList({
                 <p>{item.desc}</p>
               </div>
 
-              {/* Copy icon */}
-              <span className="copy-icon" onClick={(e) => copyData(item, e)}>
+              <span
+                className="copy-icon"
+                onClick={(e) => copyData(item, e)}
+              >
                 🗍
               </span>
             </div>
@@ -104,14 +121,29 @@ function CardList({
       );
     });
 
-  // Full-page card view
+  // ✅ DELETE CONFIRM
+  const handleDeleteConfirm = () => {
+    if (!selectedCard || !deleteBlog) return;
+
+    deleteBlog(selectedCard.id);
+    setShowDeletePopup(false);
+    setSelectedCard(null);
+  };
+
+  // 📄 Full page
   if (selectedCard) {
-    const canDelete = selectedCard?.author === currentUser;
+    const canDelete =
+      selectedCard?.author &&
+      currentUser &&
+      selectedCard.author.toLowerCase() === currentUser.toLowerCase();
 
     return (
       <>
         <div className="fullpage-card">
-          <button className="go-back-btn" onClick={() => setSelectedCard(null)}>
+          <button
+            className="go-back-btn"
+            onClick={() => setSelectedCard(null)}
+          >
             ⮌
           </button>
 
@@ -127,40 +159,116 @@ function CardList({
                 marginTop: "20px",
               }}
             >
-              {/* Delete button */}
+              {/* 🗑️ Delete (SMALL BUTTON ✅) */}
               <button
                 style={{
-                  padding: "6px 12px",
-                  borderRadius: "8px",
+                  padding: "4px 10px",
+                  borderRadius: "6px",
                   border: "1px solid #374151",
                   background: canDelete ? "#1f2933" : "#374151",
                   color: canDelete ? "#f87171" : "#9ca3af",
                   cursor: canDelete ? "pointer" : "not-allowed",
+                  fontSize: "12px",
                 }}
                 onClick={() => {
-                  if (canDelete && deleteBlog) {
-                    deleteBlog(selectedCard.id);
-                    setSelectedCard(null);
+                  if (!canDelete) {
+                    alert("You can delete only your own blog");
+                    return;
                   }
+                  setShowDeletePopup(true);
                 }}
                 disabled={!canDelete}
               >
                 Delete
               </button>
 
-              <span className="copy-icon" onClick={() => copyData(selectedCard)}>
+              {/* 📋 Copy */}
+              <span
+                className="copy-icon"
+                onClick={() => copyData(selectedCard)}
+              >
                 🗍
               </span>
             </div>
           </div>
         </div>
 
+        {/* ✅ DELETE POPUP */}
+        {showDeletePopup && (
+          <div className="popup-overlay">
+            <div className="popup-box">
+              <h3>Are you sure you want to delete?</h3>
+
+              <div className="popup-actions">
+                <button onClick={handleDeleteConfirm} className="yes">
+                  Yes
+                </button>
+                <button
+                  onClick={() => setShowDeletePopup(false)}
+                  className="no"
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {copyMessage && <div className="copy-toast">{copyMessage}</div>}
+
+        {/* ✅ INLINE CSS */}
+        <style>{`
+          .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+          }
+
+          .popup-box {
+            background: #1f2933;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            width: 280px;
+          }
+
+          .popup-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-around;
+          }
+
+          .yes {
+            background: red;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+          }
+
+          .no {
+            background: gray;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+          }
+        `}</style>
       </>
     );
   }
 
-  // Default card list view
+  // 📃 List view
   return (
     <>
       <div className="card-container">
@@ -176,7 +284,7 @@ function CardList({
               minHeight: "200px",
             }}
           >
-            <p style={{ color: "#9ca3af", fontSize: "16px", letterSpacing: "0.5px" }}>
+            <p style={{ color: "#9ca3af", fontSize: "16px" }}>
               No blogs found.
             </p>
           </div>

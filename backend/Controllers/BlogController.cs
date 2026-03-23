@@ -29,7 +29,7 @@ namespace BlogApi.Controllers
             return Ok(blogs);
         }
 
-        // 🔥 GET MY BLOGS (JWT BASED - FIXED)
+        // 🔥 GET MY BLOGS (ONLY LOGGED-IN USER)
         [Authorize]
         [HttpGet("myblogs")]
         public IActionResult GetMyBlogs()
@@ -68,7 +68,9 @@ namespace BlogApi.Controllers
         public IActionResult Get(int id)
         {
             var blog = _blogService.GetById(id);
-            if (blog == null || !blog.IsActive) return NotFound();
+
+            if (blog == null || !blog.IsActive)
+                return NotFound();
 
             return Ok(blog);
         }
@@ -87,6 +89,7 @@ namespace BlogApi.Controllers
                 return Unauthorized(new { message = "Login required to create a blog." });
             }
 
+            // ✅ Assign owner
             newBlog.Author = username;
 
             var blog = _blogService.Create(newBlog);
@@ -94,28 +97,34 @@ namespace BlogApi.Controllers
             return CreatedAtAction(nameof(Get), new { id = blog.Id }, blog);
         }
 
-        // 🔐 DELETE BLOG
+        // 🔐 DELETE BLOG (ONLY OWNER)
         [Authorize]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             var username = User.Identity?.Name;
 
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized();
+
             var blog = _blogService.GetById(id);
 
             if (blog == null)
                 return NotFound(new { message = "Blog not found." });
 
-            // ✅ Only owner can delete
+            // 🔥 OWNER CHECK (MOST IMPORTANT)
             if (blog.Author != username)
-                return Forbid();
+                return Forbid(); // user not allowed
 
             var success = _blogService.Delete(id);
+
+            if (!success)
+                return BadRequest(new { message = "Failed to delete blog." });
 
             return Ok(new { message = "Blog deleted successfully." });
         }
 
-        // 🔐 SAVE BLOG (FIXED - removed userId param)
+        // 🔐 SAVE BLOG
         [Authorize]
         [HttpPost("save/{blogId}")]
         public IActionResult SaveBlog(int blogId)

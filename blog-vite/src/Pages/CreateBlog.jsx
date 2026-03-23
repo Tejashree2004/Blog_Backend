@@ -78,7 +78,7 @@ function CreateBlog({ fetchBlogs }) {
 
       setPopup({
         show: true,
-        message: "Your blog has been created successfully.",
+        message: "Your blog has been created successfully !",
         type: "success"
       });
 
@@ -224,16 +224,40 @@ function CreateBlog({ fetchBlogs }) {
             }}
           >
             {/* HEADER */}
-            <div
-              style={{
-                padding: "16px",
-                background: popup.type === "success" ? "#2563eb" : "#dc2626",
-                color: "white",
-                textAlign: "center",
-                position: "relative"
-              }}
-            >
-              {popup.type === "success" ? "Success" : "Error"}
+ 
+<div
+  style={{
+    padding: "16px",
+    background: popup.type === "success" ? "#2563eb" : "#dc2626",
+    color: "white",
+    textAlign: "center",
+    position: "relative",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "8px"
+  }}
+>
+  {popup.type === "success" ? "Success" : "Error"}
+
+  {popup.type === "success" && (
+    <span
+      style={{
+        display: "inline-flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "22px",
+        height: "22px",
+        borderRadius: "50%",
+        background: "#22c55e",
+        color: "white",
+        fontSize: "14px",
+        fontWeight: "bold"
+      }}
+    >
+      ✓
+    </span>
+  )}
 
               {/* ❌ CLOSE ICON */}
               <span
