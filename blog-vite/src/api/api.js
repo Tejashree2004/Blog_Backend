@@ -22,8 +22,27 @@ export const getBlogById = async (id) => {
   return res.data;
 };
 
+// 🔥 UPDATED (FILE UPLOAD SUPPORT + PREVIEW SAFE)
 export const createBlog = async (data) => {
-  const res = await axiosInstance.post("/blogs", data);
+  const formData = new FormData();
+
+  formData.append("title", data.title);
+  formData.append("desc", data.desc);
+  formData.append("category", data.category);
+  formData.append("isActive", data.isActive);
+  formData.append("isUserCreated", data.isUserCreated);
+
+  // 🔥 send actual file
+  if (data.file) {
+    formData.append("image", data.file);
+  }
+
+  const res = await axiosInstance.post("/blogs", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
+
   return res.data;
 };
 
@@ -54,8 +73,7 @@ export const signupUser = async (data) => {
   return res.data;
 };
 
-// 🔥 FIXED
 export const verifyEmailOtp = async (data) => {
   const res = await axiosInstance.post("/auth/verify-email", data);
-  return res.data; // ✅ important
+  return res.data;
 };

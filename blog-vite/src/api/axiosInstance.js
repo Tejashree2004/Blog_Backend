@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// ✅ Create instance
+// ✅ Create axios instance
 const axiosInstance = axios.create({
   baseURL: "http://localhost:5111/api",
   headers: {
@@ -10,17 +10,16 @@ const axiosInstance = axios.create({
 });
 
 // ================= REQUEST INTERCEPTOR ================= //
-
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("jwtToken");
 
+    // 🔹 Debug token
     console.log("Token being sent:", token);
 
     if (token) {
+      // Attach JWT if available
       config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.warn("No JWT token found in localStorage");
     }
 
     return config;
@@ -29,19 +28,18 @@ axiosInstance.interceptors.request.use(
 );
 
 // ================= RESPONSE INTERCEPTOR ================= //
-
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => response, // success
 
   (error) => {
     console.error("🔥 FULL ERROR OBJECT:", error);
 
     const status = error.response?.status;
 
-    // 🔥 FIX: handle all possible message formats
-    let message =
+    // 🔹 Extract message safely
+    const message =
       error.response?.data?.message ||
-      error.response?.data ||
+      error.response?.data?.title ||
       error.message ||
       "Something went wrong";
 
@@ -49,10 +47,9 @@ axiosInstance.interceptors.response.use(
 
     // 🔴 401 Unauthorized
     if (status === 401) {
-      console.warn("Unauthorized - invalid/expired token");
-
+      console.warn("Unauthorized - invalid or expired token");
+      localStorage.clear();
       if (!window.location.pathname.includes("/login")) {
-        localStorage.clear();
         window.location.href = "/login";
       }
     }
@@ -64,10 +61,15 @@ axiosInstance.interceptors.response.use(
 
     // 🔴 404 Not Found
     else if (status === 404) {
-      console.error("API Not Found:", error.config?.url);
+      console.error("API endpoint not found:", error.config?.url);
     }
 
-    // 🔴 500 Server Error
+    // 🔴 400 Bad Request
+    else if (status === 400) {
+      console.error("Bad Request:", message);
+    }
+
+    // 🔴 500+ Server Error
     else if (status >= 500) {
       console.error("Server error:", message);
     }

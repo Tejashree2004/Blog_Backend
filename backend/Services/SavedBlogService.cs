@@ -13,11 +13,9 @@ namespace BlogApi.Services
 
         public SavedBlogService(IWebHostEnvironment env)
         {
-            // content root — fallback to AppContext.BaseDirectory if env null
             var contentRoot = env?.ContentRootPath ?? AppContext.BaseDirectory;
             _filePath = Path.Combine(contentRoot, "savedBlogs.json");
 
-            // Ensure directory and file exist (best effort)
             try
             {
                 var dir = Path.GetDirectoryName(_filePath);
@@ -29,11 +27,11 @@ namespace BlogApi.Services
             }
             catch
             {
-                // ignore — will be handled during read/write operations
+                // ignore
             }
         }
 
-        // Read full dictionary from file (safe)
+        // Read all saved blogs safely
         private Dictionary<string, List<int>> ReadAll()
         {
             lock (_fileLock)
@@ -56,13 +54,12 @@ namespace BlogApi.Services
                 }
                 catch
                 {
-                    // If file is corrupted or cannot be parsed, return empty structure
                     return new Dictionary<string, List<int>>();
                 }
             }
         }
 
-        // Write full dictionary to file (safe)
+        // Write all saved blogs safely
         private void WriteAll(Dictionary<string, List<int>> data)
         {
             lock (_fileLock)
@@ -80,12 +77,12 @@ namespace BlogApi.Services
 
             var data = ReadAll();
             if (data.ContainsKey(userId))
-                return new List<int>(data[userId]); // return copy
+                return new List<int>(data[userId]);
 
             return new List<int>();
         }
 
-        // Public: save blog for a user (idempotent)
+        // Public: save a blog for a user
         public void SaveBlog(string userId, int blogId)
         {
             if (string.IsNullOrWhiteSpace(userId))
@@ -101,10 +98,9 @@ namespace BlogApi.Services
                 data[userId].Add(blogId);
                 WriteAll(data);
             }
-            // if already exists — do nothing (idempotent)
         }
 
-        // Public: unsave blog for a user
+        // Public: unsave a blog for a user
         public void UnsaveBlog(string userId, int blogId)
         {
             if (string.IsNullOrWhiteSpace(userId))

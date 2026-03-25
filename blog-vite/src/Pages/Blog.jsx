@@ -79,7 +79,7 @@ function Blog() {
     }
   };
 
-  // 🗑️ DELETE BLOG (🔥 NEW)
+  // 🗑️ DELETE BLOG
   const deleteBlog = async (blogId) => {
     try {
       await axiosInstance.delete(`/blogs/${blogId}`);
@@ -93,7 +93,7 @@ function Blog() {
     }
   };
 
-  // 🧠 Data filters (SAFE compare)
+  // 🧠 Filter blogs
   const myBlogs = blogs.filter(
     (b) =>
       b.isUserCreated &&
@@ -130,7 +130,8 @@ function Blog() {
               savedBlogIds={savedBlogIds}
               saveBlog={saveBlog}
               unsaveBlog={unsaveBlog}
-              deleteBlog={deleteBlog}   // ✅ FIX
+              deleteBlog={deleteBlog}
+              currentUser={currentUser} // 🔑 pass current user
             />
           </section>
 
@@ -143,7 +144,8 @@ function Blog() {
               savedBlogIds={savedBlogIds}
               saveBlog={saveBlog}
               unsaveBlog={unsaveBlog}
-              deleteBlog={deleteBlog}   // ✅ FIX
+              deleteBlog={deleteBlog}
+              currentUser={currentUser} // 🔑 pass current user
             />
           </section>
         </>
@@ -158,7 +160,8 @@ function Blog() {
             savedBlogIds={savedBlogIds}
             saveBlog={saveBlog}
             unsaveBlog={unsaveBlog}
-            deleteBlog={deleteBlog}   // ✅ FIX
+            deleteBlog={deleteBlog}
+            currentUser={currentUser} // 🔑 pass current user
           />
         </section>
       )}

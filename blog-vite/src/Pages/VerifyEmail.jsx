@@ -58,7 +58,7 @@ function VerifyEmail() {
       if (res?.message) {
         setPopup({
           show: true,
-          message: res.message || "Email verified successfully !",
+          message: res.message || "Email verified successfully!",
           type: "success"
         });
       } else {
@@ -115,95 +115,114 @@ function VerifyEmail() {
 
       {/* ================= POPUP (SAME AS CREATE BLOG) ================= */}
       {popup.show && (
-        <div
-          onClick={closePopup}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.35)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 999
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "400px",
-              background: "#111827",
-              borderRadius: "12px",
-              border: "1px solid #1f2937",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-              overflow: "hidden"
-            }}
-          >
-            {/* HEADER */}
-    
-<div
-  style={{
-    padding: "16px",
-    background: popup.type === "success" ? "#2563eb" : "#dc2626",
-    color: "white",
-    textAlign: "center",
-    position: "relative",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: "8px"
-  }}
->
-  {popup.type === "success" ? "Success" : "Error"}
-
-  {popup.type === "success" && (
-    <span
+  <div
+    onClick={closePopup}
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      background: "rgba(0,0,0,0.35)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 999
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
       style={{
-        display: "inline-flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "22px",
-        height: "22px",
-        borderRadius: "50%",
-        background: "#22c55e",
-        color: "white",
-        fontSize: "14px",
-        fontWeight: "bold"
+        width: "400px",
+        background: "#111827",
+        borderRadius: "12px",
+        border: "1px solid #1f2937",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+        overflow: "hidden"
       }}
     >
-      ✓
-    </span>
-  )}
-              <span
-                onClick={closePopup}
-                style={{
-                  position: "absolute",
-                  right: "15px",
-                  top: "10px",
-                  cursor: "pointer",
-                  fontSize: "16px"
-                }}
-              >
-                ✕
-              </span>
-            </div>
+      {/* HEADER */}
+      <div
+        style={{
+          padding: "16px",
+          background: popup.type === "success" ? "#2563eb" : "#2563eb",
+          color: "white",
+          textAlign: "center",
+          position: "relative",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "8px"
+        }}
+      >
+        {popup.type === "success" ? "Success" : "Error"}
 
-            {/* BODY */}
-            <div
-              style={{
-                padding: "25px",
-                textAlign: "center",
-                color: "#e5e7eb",
-                fontSize: "14px"
-              }}
-            >
-              {popup.message}
-            </div>
-          </div>
-        </div>
-      )}
+        {/* Symbol */}
+        {popup.type === "success" ? (
+          <span
+            style={{
+              display: "inline-flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "22px",
+              height: "22px",
+              borderRadius: "50%",
+              background: "#22c55e",
+              color: "white",
+              fontSize: "14px",
+              fontWeight: "bold"
+            }}
+          >
+            ✓
+          </span>
+        ) : (
+          <span
+            style={{
+              display: "inline-flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "22px",
+              height: "22px",
+              borderRadius: "50%",
+              background: "#ef4444",
+              color: "white",
+              fontSize: "14px",
+              fontWeight: "bold"
+            }}
+          >
+            ✕
+          </span>
+        )}
+
+        {/* CLOSE BUTTON */}
+        <span
+          onClick={closePopup}
+          style={{
+            position: "absolute",
+            right: "15px",
+            top: "10px",
+            cursor: "pointer",
+            fontSize: "16px"
+          }}
+        >
+          ✕
+        </span>
+      </div>
+
+      {/* BODY */}
+      <div
+        style={{
+          padding: "25px",
+          textAlign: "center",
+          color: "#e5e7eb",
+          fontSize: "14px"
+        }}
+      >
+        {popup.message}
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

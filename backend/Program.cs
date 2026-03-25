@@ -76,11 +76,9 @@ builder.Services.AddSwaggerGen();
 
 // ================= SMTP CONFIG (.env) ================= //
 
-// 👉 Get values from .env
 var smtpEmail = Environment.GetEnvironmentVariable("SMTP_EMAIL");
 var smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
 
-// 👉 Validate (to avoid runtime error)
 if (string.IsNullOrWhiteSpace(smtpEmail) ||
     string.IsNullOrWhiteSpace(smtpPassword))
 {
@@ -89,11 +87,9 @@ if (string.IsNullOrWhiteSpace(smtpEmail) ||
 
 // ================= SERVICES ================= //
 
-// 🔥 IMPORTANT: use Scoped (NOT Singleton)
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<EmailService>();
 
-// Other services can remain singleton
 builder.Services.AddSingleton<BlogService>();
 builder.Services.AddSingleton<SavedBlogService>();
 
@@ -106,15 +102,16 @@ var app = builder.Build();
 
 app.UseCors("AllowReact");
 
-app.UseAuthentication();   // MUST be before Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
+// 🔥🔥 CHANGE HERE (Swagger DISABLED)
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // app.UseSwagger();
+    // app.UseSwaggerUI();
 }
 
 app.MapControllers();

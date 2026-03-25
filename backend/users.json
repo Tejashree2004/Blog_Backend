@@ -1,21 +1,21 @@
 [
   {
     "Id": 1,
-    "Username": "tejashreeshejwal264",
-    "Email": "tejashreeshejwal264@gmail.com",
-    "Password": "87654321",
+    "Username": "tejashrishejval",
+    "Email": "tejashrishejval@gmail.com",
+    "Password": "12345678",
     "IsGuest": false,
-    "CreatedDate": "2026-03-23T13:44:13.2978924+05:30",
-    "IsVerified": true,
-    "Otp": null
+    "CreatedDate": "2026-03-25T12:54:30.0001166+05:30",
+    "IsVerified": false,
+    "Otp": "893970"
   },
   {
     "Id": 2,
-    "Username": "tejashrishejval",
-    "Email": "tejashrishejval@gmail.com",
-    "Password": "45674567",
+    "Username": "tejashreeshejwal264",
+    "Email": "tejashreeshejwal264@gmail.com",
+    "Password": "98765432",
     "IsGuest": false,
-    "CreatedDate": "2026-03-23T13:45:34.3660445+05:30",
+    "CreatedDate": "2026-03-25T13:03:12.6878437+05:30",
     "IsVerified": true,
     "Otp": null
   }

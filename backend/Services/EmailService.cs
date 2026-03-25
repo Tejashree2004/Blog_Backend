@@ -23,21 +23,29 @@ namespace Backend.Services
             {
                 var emailSettings = _config.GetSection("SMTP");
 
-                // 👉 Email config (can stay in appsettings.json)
                 string senderEmail = Environment.GetEnvironmentVariable("SMTP_EMAIL")
                     ?? emailSettings["Email"]
                     ?? throw new Exception("SMTP Email not configured");
 
-                // 🔥 Password ONLY from .env (secure)
                 string senderPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD")
                     ?? throw new Exception("SMTP Password not configured in .env");
 
                 string smtpHost = emailSettings["Host"] ?? "smtp.gmail.com";
 
-                int smtpPort = 587;
+                // ✅ Dual port fallback: 465 SSL default, fallback to 587 STARTTLS
+                int smtpPort = 465; 
+                SecureSocketOptions sslOption = SecureSocketOptions.SslOnConnect;
+
                 if (!int.TryParse(emailSettings["Port"], out smtpPort))
                 {
-                    smtpPort = 587;
+                    smtpPort = 465;
+                    sslOption = SecureSocketOptions.SslOnConnect;
+                }
+                else
+                {
+                    // Optional: if port in config is 587
+                    if (smtpPort == 587)
+                        sslOption = SecureSocketOptions.StartTls;
                 }
 
                 // ✅ Create email
@@ -46,37 +54,50 @@ namespace Backend.Services
                 emailMessage.To.Add(MailboxAddress.Parse(toEmail));
                 emailMessage.Subject = string.IsNullOrWhiteSpace(subject) ? "OTP Verification" : subject;
 
-                // 🔥 PROFESSIONAL EMAIL BODY (ONLY CHANGE)
                 var currentTime = DateTime.Now.ToString("f");
 
+                // 🔹 HTML email body with bold OTP
                 string emailBody = $@"
-Hello,
+<html>
+<body>
+<p>Hello,</p>
 
-We received a request to verify your email address for your Blog App account.
+<p>Here’s your secure code to access your Blog App account:</p>
 
- {message}
+<p><b>{message}</b></p>
 
-This OTP is valid for 10 minutes.
+<p>This code is valid for 10 minutes.</p>
 
-Request Time: {currentTime}
+<p>Request Time: {currentTime}</p>
 
-If you did not request this, please ignore this email and ensure your account is secure.
+<p>If you did not request this, please ignore this email and ensure your account is secure.</p>
 
-Regards,  
-Blog App Team
+<p>Regards,<br/>Blog App Team</p>
+</body>
+</html>
 ";
 
-                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Plain)
+                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
                 {
                     Text = emailBody
                 };
 
-                // ✅ Send email
                 using var client = new SmtpClient();
 
-                await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
+                try
+                {
+                    // 🔹 Try default SSL connection (465)
+                    await client.ConnectAsync(smtpHost, smtpPort, sslOption);
+                }
+                catch
+                {
+                    // 🔹 If fails, fallback to 587 STARTTLS
+                    smtpPort = 587;
+                    sslOption = SecureSocketOptions.StartTls;
+                    await client.ConnectAsync(smtpHost, smtpPort, sslOption);
+                }
 
-                // 🔐 Secure authentication
+                // 🔹 Authenticate
                 await client.AuthenticateAsync(senderEmail, senderPassword);
 
                 await client.SendAsync(emailMessage);

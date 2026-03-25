@@ -42,6 +42,7 @@ namespace BlogApi.Helpers
             // 🔥 Claims (username stored here)
             var claims = new[]
             {
+                new Claim(JwtRegisteredClaimNames.UniqueName, username), // unique_name claim for User.Identity.Name
                 new Claim(ClaimTypes.Name, username)
             };
 

@@ -8,17 +8,18 @@ namespace BlogApi.Models
 
         public string Desc { get; set; } = string.Empty;
 
+        // 🔥 IMAGE PATH (stored after upload)
         public string Image { get; set; } = string.Empty;
 
         public string Category { get; set; } = "blog";
 
         public bool IsUserCreated { get; set; } = false;
 
-        // ⭐ IMPORTANT: This stores who created the blog (email or userId)
-        // 👉 Use this to allow delete only for the owner
+        // 🔐 Owner of blog
         public string Author { get; set; } = string.Empty;
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        // 🔥 BETTER DATE FORMAT (optional but good)
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         public bool IsActive { get; set; } = true;
     }

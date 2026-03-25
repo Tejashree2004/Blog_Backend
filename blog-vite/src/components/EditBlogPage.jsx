@@ -1,35 +1,46 @@
 import React, { useState, useRef, useEffect } from "react";
 import axiosInstance from "../api/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 
-function CreateBlog({ fetchBlogs }) {
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
+function EditBlogPage({ fetchBlogs }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+
+  // Get blog either from state (CardList) or fetch by id if directly accessed
+  const [blogData, setBlogData] = useState(location.state?.blog || null);
+
+  const [title, setTitle] = useState(blogData?.title || "");
+  const [desc, setDesc] = useState(blogData?.desc || "");
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState(blogData?.image || null);
 
-  const [popup, setPopup] = useState({
-    show: false,
-    message: "",
-    type: ""
-  });
+  const [popup, setPopup] = useState({ show: false, message: "", type: "" });
 
   const fileRef = useRef(null);
-  const navigate = useNavigate();
 
-  // 🔐 Auth check
+  // 🔹 Fetch blog if direct navigation
   useEffect(() => {
-    const token = localStorage.getItem("jwtToken");
-
-    if (!token) {
-      setPopup({
-        show: true,
-        message: "Login required to create a blog.",
-        type: "error"
-      });
-      navigate("/login");
+    if (!blogData && params.id) {
+      const fetchBlog = async () => {
+        try {
+          const res = await axiosInstance.get(`/blogs/${params.id}`);
+          setBlogData(res.data);
+          setTitle(res.data.title);
+          setDesc(res.data.desc);
+          setPreview(res.data.image || null);
+        } catch (err) {
+          console.error("Error fetching blog:", err);
+          setPopup({
+            show: true,
+            message: "Failed to load blog.",
+            type: "error",
+          });
+        }
+      };
+      fetchBlog();
     }
-  }, [navigate]);
+  }, [blogData, params.id]);
 
   const handleGoBack = () => navigate("/blog");
 
@@ -37,111 +48,87 @@ function CreateBlog({ fetchBlogs }) {
 
   const clearFile = () => {
     setFile(null);
-    setPreview(null);
+    setPreview(blogData?.image || null);
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  // 🔥 Cleanup preview URL
+  // Cleanup preview URL
   useEffect(() => {
     return () => {
-      if (preview) URL.revokeObjectURL(preview);
+      if (preview && file) URL.revokeObjectURL(preview);
     };
-  }, [preview]);
+  }, [preview, file]);
 
   const closePopup = () => {
     setPopup({ show: false, message: "", type: "" });
-
-    if (popup.type === "success") {
-      navigate("/blog");
-    }
+    if (popup.type === "success") navigate("/blog");
   };
 
-  // 🔥 FILE CHANGE HANDLER (FIXED)
   const handleFileChange = (e) => {
     const selectedFile = e.target.files?.[0];
-
-    console.log("FILE:", selectedFile);
-
     if (!selectedFile) return;
 
     setFile(selectedFile);
-
-    const objectUrl = URL.createObjectURL(selectedFile);
-    console.log("PREVIEW:", objectUrl);
-
-    setPreview(objectUrl);
+    setPreview(URL.createObjectURL(selectedFile));
   };
 
-  // 🔥 ONLY THIS FUNCTION UPDATED
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const token = localStorage.getItem("jwtToken");
-
-    if (!token) {
-      setPopup({
-        show: true,
-        message: "Login required!",
-        type: "error"
-      });
+    if (!blogData) {
+      setPopup({ show: true, message: "Blog not loaded.", type: "error" });
       return;
     }
 
-    // ✅ FORM DATA (instead of JSON)
-    const formData = new FormData();
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      setPopup({ show: true, message: "Login required!", type: "error" });
+      return;
+    }
 
+    const formData = new FormData();
     formData.append("title", title.trim() || "Default Title");
     formData.append("desc", desc.trim() || "Default Description");
     formData.append("category", "blog");
     formData.append("isActive", true);
     formData.append("isUserCreated", true);
-
-    // 🔥 FILE ADD
-    if (file) {
-      formData.append("image", file);
-    }
+    if (file) formData.append("image", file);
 
     try {
-      await axiosInstance.post("/blogs", formData, {
+      await axiosInstance.put(`/blogs/${blogData.id}`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data"
-        }
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       setPopup({
         show: true,
-        message: "Your blog has been created successfully!",
-        type: "success"
+        message: "Your blog has been updated successfully!",
+        type: "success",
       });
-
-      setTitle("");
-      setDesc("");
-      clearFile();
 
       if (fetchBlogs) fetchBlogs();
-
     } catch (err) {
-      console.log("🔥 FULL ERROR:", err.response?.data);
-      console.log("❌ VALIDATION:", err.response?.data?.errors);
-
+      console.error("Error updating blog:", err.response?.data || err);
       setPopup({
         show: true,
-        message: JSON.stringify(err.response?.data?.errors || "Error"),
-        type: "error"
+        message:
+          JSON.stringify(err.response?.data?.errors || "Update failed"),
+        type: "error",
       });
     }
   };
 
+  if (!blogData) return <p style={{ color: "white" }}>Loading blog...</p>;
+
   return (
     <div className="create-page" style={{ position: "relative" }}>
-
-      {/* BACK BUTTON */}
       <button className="go-back-btn" onClick={handleGoBack}>
         ⮌
       </button>
 
       <form className="create-blog-form" onSubmit={handleSubmit}>
-        <h2 className="create-title">Create a New Blog</h2>
+        <h2 className="create-title">Edit Blog</h2>
 
         <input
           type="text"
@@ -151,7 +138,7 @@ function CreateBlog({ fetchBlogs }) {
           required
         />
 
-        {/* FILE UPLOAD */}
+        {/* File Upload */}
         <div style={{ marginTop: "20px" }}>
           <input
             type="file"
@@ -172,25 +159,19 @@ function CreateBlog({ fetchBlogs }) {
               border: "1px dashed #3b82f6",
               cursor: "pointer",
               background: "transparent",
-              color: "white"
+              color: "white",
             }}
           >
             <img
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT95rKJldDyjAtvUJXQ4RpytJGo5QT8yooACQ&s"
               alt="attach"
-              style={{
-                width: "18px",
-                height: "18px",
-                filter: "invert(1)",
-                opacity: "0.6"
-              }}
+              style={{ width: "18px", height: "18px", filter: "invert(1)", opacity: 0.6 }}
             />
             <span style={{ opacity: file ? 1 : 0.6 }}>
               {file ? file.name : "Attach file"}
             </span>
           </div>
 
-          {/* REMOVE BUTTON */}
           {file && (
             <button
               type="button"
@@ -202,14 +183,13 @@ function CreateBlog({ fetchBlogs }) {
                 cursor: "pointer",
                 background: "#0f172a",
                 color: "#3b82f6",
-                border: "1px solid #1e293b"
+                border: "1px solid #1e293b",
               }}
             >
               Remove File
             </button>
           )}
 
-          {/* 🔥 PREVIEW */}
           {preview && (
             <div
               style={{
@@ -217,13 +197,10 @@ function CreateBlog({ fetchBlogs }) {
                 padding: "10px",
                 border: "2px solid #3b82f6",
                 borderRadius: "8px",
-                background: "#020617"
+                background: "#020617",
               }}
             >
-              <p style={{ color: "#9ca3af", fontSize: "13px" }}>
-                Image Preview:
-              </p>
-
+              <p style={{ color: "#9ca3af", fontSize: "13px" }}>Image Preview:</p>
               <img
                 src={preview}
                 alt="preview"
@@ -232,7 +209,7 @@ function CreateBlog({ fetchBlogs }) {
                   maxHeight: "60px",
                   objectFit: "contain",
                   borderRadius: "8px",
-                  marginTop: "8px"
+                  marginTop: "8px",
                 }}
               />
             </div>
@@ -250,12 +227,13 @@ function CreateBlog({ fetchBlogs }) {
 
         <div className="btn-center" style={{ marginTop: "25px" }}>
           <button type="submit" className="create-btn">
-            Create
+            Update
           </button>
         </div>
       </form>
 
-     {popup.show && (
+      {/* Popup */}
+{popup.show && (
   <div
     onClick={closePopup}
     style={{
@@ -268,7 +246,7 @@ function CreateBlog({ fetchBlogs }) {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      zIndex: 999
+      zIndex: 999,
     }}
   >
     <div
@@ -279,7 +257,7 @@ function CreateBlog({ fetchBlogs }) {
         borderRadius: "12px",
         border: "1px solid #1f2937",
         boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-        overflow: "hidden"
+        overflow: "hidden",
       }}
     >
       {/* HEADER */}
@@ -293,7 +271,7 @@ function CreateBlog({ fetchBlogs }) {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          gap: "8px"
+          gap: "8px",
         }}
       >
         {popup.type === "success" ? "Success" : "Error"}
@@ -311,7 +289,7 @@ function CreateBlog({ fetchBlogs }) {
               background: "#22c55e",
               color: "white",
               fontSize: "14px",
-              fontWeight: "bold"
+              fontWeight: "bold",
             }}
           >
             ✓
@@ -328,7 +306,7 @@ function CreateBlog({ fetchBlogs }) {
               background: "#ef4444",
               color: "white",
               fontSize: "14px",
-              fontWeight: "bold"
+              fontWeight: "bold",
             }}
           >
             ✕
@@ -343,7 +321,7 @@ function CreateBlog({ fetchBlogs }) {
             right: "15px",
             top: "10px",
             cursor: "pointer",
-            fontSize: "16px"
+            fontSize: "16px",
           }}
         >
           ✕
@@ -356,7 +334,7 @@ function CreateBlog({ fetchBlogs }) {
           padding: "25px",
           textAlign: "center",
           color: "#e5e7eb",
-          fontSize: "14px"
+          fontSize: "14px",
         }}
       >
         {popup.message}
@@ -368,4 +346,4 @@ function CreateBlog({ fetchBlogs }) {
   );
 }
 
-export default CreateBlog; 
+export default EditBlogPage;
