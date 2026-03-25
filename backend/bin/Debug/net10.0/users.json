@@ -1,12 +1,12 @@
 [
   {
     "Id": 1,
-    "Username": "tejashrishejval",
-    "Email": "tejashrishejval@gmail.com",
-    "Password": "12345678",
+    "Username": "tejashreeshejwal264",
+    "Email": "tejashreeshejwal264@gmail.com",
+    "Password": "98765432",
     "IsGuest": false,
-    "CreatedDate": "2026-03-25T12:54:30.0001166+05:30",
-    "IsVerified": false,
-    "Otp": "893970"
+    "CreatedDate": "2026-03-25T23:39:46.6299971+05:30",
+    "IsVerified": true,
+    "Otp": null
   }
 ]

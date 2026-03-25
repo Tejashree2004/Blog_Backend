@@ -57,11 +57,15 @@ function CardList({
     return true;
   });
 
-  const getImageSrc = (item) => {
-    if (!item?.image) return "https://picsum.photos/300/200?random";
-    return item.image;
-  };
 
+// 🔥 ONLY THIS FUNCTION UPDATED
+const getImageSrc = (item) => {
+  if (!item?.image) return "https://picsum.photos/300/200?random";
+
+  if (item.image.startsWith("http")) return item.image;
+
+  return `http://localhost:5111${item.image}`;
+};
   const renderCards = (data) =>
     data.map((item) => {
       const isSaved = savedIds.includes(item.id);
@@ -148,60 +152,64 @@ function CardList({
             <img src={getImageSrc(selectedCard)} alt={selectedCard.title} />
             <p>{selectedCard.desc}</p>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: "20px",
-              }}
-            >
-              <button
-                style={{
-                  padding: "4px 10px",
-                  borderRadius: "6px",
-                  border: "1px solid #374151",
-                  background: canDelete ? "#1f2933" : "#374151",
-                  color: canDelete ? "#f87171" : "#9ca3af",
-                  cursor: canDelete ? "pointer" : "not-allowed",
-                  fontSize: "12px",
-                }}
-                onClick={() => {
-                  if (!canDelete) {
-                    alert("You can delete only your own blog");
-                    return;
-                  }
-                  setShowDeletePopup(true);
-                }}
-                disabled={!canDelete}
-              >
-                Delete
-              </button>
+<div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "20px",
+  }}
+>
+  <div style={{ display: "flex", gap: "8px" }}>
+    
+    <button
+      style={{
+        padding: "4px 10px",
+        borderRadius: "6px",
+        border: "1px solid #374151",
+        background: canDelete ? "#1f2933" : "#374151",
+        color: canDelete ? "#60a5fa" : "#9ca3af",
+        cursor: canDelete ? "pointer" : "not-allowed",
+        fontSize: "12px",
+      }}
+      onClick={() => {
+        if (!canDelete) return;
+        navigate(`/edit-blog/${selectedCard.id}`, {
+          state: { blog: selectedCard },
+        });
+      }}
+      disabled={!canDelete}
+    >
+      Edit
+    </button>
+    <button
+      style={{
+        padding: "4px 10px",
+        borderRadius: "6px",
+        border: "1px solid #374151",
+        background: canDelete ? "#1f2933" : "#374151",
+        color: canDelete ? "#f87171" : "#9ca3af",
+        cursor: canDelete ? "pointer" : "not-allowed",
+        fontSize: "12px",
+      }}
+      onClick={() => {
+        if (!canDelete) {
+          alert("You can delete only your own blog");
+          return;
+        }
+        setShowDeletePopup(true);
+      }}
+      disabled={!canDelete}
+    >
+      Delete
+    </button>
 
-              <button
-                style={{
-                  padding: "4px 10px",
-                  borderRadius: "6px",
-                  border: "1px solid #374151",
-                  background: canDelete ? "#1f2933" : "#374151",
-                  color: canDelete ? "#60a5fa" : "#9ca3af",
-                  cursor: canDelete ? "pointer" : "not-allowed",
-                  fontSize: "12px",
-                }}
-                onClick={() => {
-                  if (!canDelete) return;
-                  navigate(`/edit-blog/${selectedCard.id}`, {
-                    state: { blog: selectedCard },
-                  });
-                }}
-                disabled={!canDelete}
-              >
-                Edit
-              </button>
+  </div>
 
-              <span className="copy-icon" onClick={() => copyData(selectedCard)}>
-                🗍
-              </span>
-            </div>
+  <span className="copy-icon" onClick={() => copyData(selectedCard)}>
+    🗍
+  </span>
+</div>
           </div>
         </div>
 

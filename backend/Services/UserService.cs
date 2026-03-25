@@ -95,11 +95,12 @@ namespace BlogApi.Services
 
             try
             {
-               _ = _emailService.SendEmailAsync(
+_ = _emailService.SendEmailAsync(
     email,
     "Your OTP Code",
-    $"Your OTP is: {otp}"
+    otp
 );
+
 
                 Console.WriteLine($"✅ OTP sent to email: {email}");
             }

@@ -102,6 +102,9 @@ var app = builder.Build();
 
 app.UseCors("AllowReact");
 
+// 🔥🔥 ADD THIS LINE (VERY IMPORTANT)
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

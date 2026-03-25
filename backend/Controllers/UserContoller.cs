@@ -45,7 +45,7 @@ namespace BlogApi.Controllers
                         await _emailService.SendEmailAsync(
                             createdUser.Email,
                             "Verify your email",
-                            $"Your OTP is {otp}"
+                            otp.ToString() // ✅ ONLY OTP (no "Your OTP is")
                         );
                     }
                 }

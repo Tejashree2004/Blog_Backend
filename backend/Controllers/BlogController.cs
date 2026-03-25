@@ -175,7 +175,9 @@ namespace BlogApi.Controllers
                 using var stream = new FileStream(fullPath, FileMode.Create);
                 await image.CopyToAsync(stream);
 
-                imagePath = $"/uploads/{fileName}";
+                
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+imagePath = $"{baseUrl}/uploads/{fileName}";
             }
 
             var updated = _blogService.Update(id, title, desc, category, isActive, imagePath);

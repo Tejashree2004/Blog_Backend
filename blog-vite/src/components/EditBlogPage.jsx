@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
+const BASE_URL = "http://localhost:5111";
 
 function EditBlogPage({ fetchBlogs }) {
   const navigate = useNavigate();
@@ -12,8 +13,17 @@ function EditBlogPage({ fetchBlogs }) {
 
   const [title, setTitle] = useState(blogData?.title || "");
   const [desc, setDesc] = useState(blogData?.desc || "");
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(blogData?.image || null);
+ 
+  const [file, setFile] = useState({
+  name: blogData?.image?.split("/").pop() || "",
+});
+  const [preview, setPreview] = useState(
+  blogData?.image
+    ? blogData.image.startsWith("http")
+      ? blogData.image
+      : `${BASE_URL}${blogData.image}`
+    : null
+);
 
   const [popup, setPopup] = useState({ show: false, message: "", type: "" });
 
@@ -28,7 +38,13 @@ function EditBlogPage({ fetchBlogs }) {
           setBlogData(res.data);
           setTitle(res.data.title);
           setDesc(res.data.desc);
-          setPreview(res.data.image || null);
+          setPreview(
+  res.data.image
+    ? res.data.image.startsWith("http")
+      ? res.data.image
+      : `${BASE_URL}${res.data.image}`
+    : null
+);
         } catch (err) {
           console.error("Error fetching blog:", err);
           setPopup({

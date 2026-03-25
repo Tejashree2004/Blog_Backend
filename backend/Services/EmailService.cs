@@ -59,25 +59,30 @@ namespace Backend.Services
                 // 🔹 HTML email body with bold OTP
                 string emailBody = $@"
 <html>
-<body>
+<body style='font-family: Arial, sans-serif; line-height:1.6; color:#111;'>
+
 <p>Hello,</p>
 
-<p>Here’s your secure code to access your Blog App account:</p>
+<p>We received a request to access your <b>BlogApp</b> account. Please use the One-Time Password (OTP) below to proceed:</p>
 
-<p><b>{message}</b></p>
+<p style='font-size:22px; font-weight:bold; color:#2563eb; letter-spacing:3px; text-align:center; margin:20px 0;'>
+    {message}
+</p>
 
-<p>This code is valid for 10 minutes.</p>
+<p>This OTP is valid for <b>10 minutes</b>. For your security, please do not share this code with anyone.</p>
 
-<p>Request Time: {currentTime}</p>
+<p><b>Request Time:</b> {currentTime}</p>
 
-<p>If you did not request this, please ignore this email and ensure your account is secure.</p>
+<p>If you did not initiate this request, you can safely ignore this email. No further action is required.</p>
 
-<p>Regards,<br/>Blog App Team</p>
+<br/>
+
+<p>Best regards,<br/>
+<b>BlogApp Team</b></p>
+
 </body>
 </html>
-";
-
-                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+";       emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
                 {
                     Text = emailBody
                 };
