@@ -119,5 +119,38 @@
     "Author": "tejashreeshejwal264",
     "CreatedDate": "2026-03-25T23:44:15.3239673+05:30",
     "IsActive": true
+  },
+  {
+    "Id": 12,
+    "Title": "Web Development",
+    "Desc": "It is a web develoment blog.",
+    "Image": "/uploads/53b660f5-155d-4323-8af1-4b4e6bcd1365.jpg",
+    "Category": "blog",
+    "IsUserCreated": true,
+    "Author": "tejashrishejval",
+    "CreatedDate": "2026-03-26T13:44:59.5378886+05:30",
+    "IsActive": true
+  },
+  {
+    "Id": 13,
+    "Title": "python",
+    "Desc": "it is a python file .it is a very easy to learn.",
+    "Image": "/uploads/ee95cc73-4eb6-4763-b1d9-ce9f265ca0c5.jpg",
+    "Category": "blog",
+    "IsUserCreated": true,
+    "Author": "tejashrishejval",
+    "CreatedDate": "2026-03-26T17:25:32.3980262+05:30",
+    "IsActive": false
+  },
+  {
+    "Id": 14,
+    "Title": "react",
+    "Desc": "its react.",
+    "Image": "/uploads/d25247f3-ac6f-4656-90f2-4585ebd7203d.jpg",
+    "Category": "blog",
+    "IsUserCreated": true,
+    "Author": "tejashrishejval",
+    "CreatedDate": "2026-03-26T17:26:53.1211022+05:30",
+    "IsActive": false
   }
 ]
